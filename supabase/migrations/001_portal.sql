@@ -64,6 +64,13 @@ alter table public.national_holidays enable row level security;
 alter table public.regional_holidays enable row level security;
 alter table public.calendar_events enable row level security;
 
+-- Повторный db push: политики уже могли быть созданы вручную / прошлым запуском
+drop policy if exists "staff_profiles_all" on public.staff_profiles;
+drop policy if exists "absences_all" on public.absences;
+drop policy if exists "national_holidays_all" on public.national_holidays;
+drop policy if exists "regional_holidays_all" on public.regional_holidays;
+drop policy if exists "calendar_events_all" on public.calendar_events;
+
 create policy "staff_profiles_all" on public.staff_profiles for all using (true) with check (true);
 create policy "absences_all" on public.absences for all using (true) with check (true);
 create policy "national_holidays_all" on public.national_holidays for all using (true) with check (true);
