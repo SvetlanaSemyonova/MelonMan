@@ -19,6 +19,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Без этого секреты из Environment «github-pages» не попадают в build — на сайте пустой Supabase.
+    environment:
+      name: github-pages
     steps:
       - uses: actions/checkout@v4
 
@@ -29,12 +32,21 @@ jobs:
 
       - run: npm ci
 
+      - name: Проверка секретов Supabase (иначе Vite встроит пустые строки)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::error title=Нет ключей для сборки::Добавьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY: Settings → Secrets and variables → Actions → Repository secrets (имена точно как в workflow). Значения — из Supabase → Project Settings → API."
+            exit 1
+          fi
+
       - name: Build
         run: npm run build
         env:
           # Путь к сайту: https://<user>.github.io/<имя-репозитория>/
           VITE_BASE: /${{ github.event.repository.name }}/
-          # Settings → Secrets and variables → Actions (Repository secrets)
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
