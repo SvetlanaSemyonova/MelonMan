@@ -66,7 +66,10 @@ export default function App() {
               borderBottom: "1px solid #fcd34d",
             }}
           >
-            {error} {loading ? "" : "Проверьте таблицы в Supabase и SQL из supabase/migrations/001_portal.sql."}
+            {error}{" "}
+            {loading
+              ? ""
+              : "Миграция нужна только для таблиц в облаке; для браузера обязателен .env с ключами API."}
           </div>
         ) : null}
         <Header

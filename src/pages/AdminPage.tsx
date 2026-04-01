@@ -68,7 +68,9 @@ export function AdminPage() {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim() || !email.trim()) return;
     if (!supabase) {
-      setSubmitError("Supabase не настроен.");
+      setSubmitError(
+        "Укажите VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в .env и перезапустите dev-сервер."
+      );
       return;
     }
 

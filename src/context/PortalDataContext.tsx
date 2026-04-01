@@ -67,7 +67,8 @@ async function fetchAll() {
       national: [] as NationalHolidayRow[],
       regional: [] as RegionalHolidayDbRow[],
       calendar: [] as CalendarEventRow[],
-      error: "Supabase не настроен (переменные VITE_SUPABASE_*).",
+      error:
+        "Нет переменных VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY. В корне проекта создайте файл .env (скопируйте из .env.example), вставьте ключ из Supabase → Settings → API и перезапустите npm run dev.",
     };
   }
 
