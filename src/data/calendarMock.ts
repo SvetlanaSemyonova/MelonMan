@@ -24,7 +24,7 @@ export interface StoredEvent {
   nationalStyle?: "bar" | "text";
 }
 
-/** Absolute-date events (demo data — May 2024 mock + samples on other months) */
+/** Демо-массив (календарь в приложении берёт события из Supabase через PortalDataProvider). */
 export const storedEvents: StoredEvent[] = [
   { id: "s1", kind: "sick", label: "Sarah J.", start: "2024-05-02" },
   {
@@ -65,8 +65,8 @@ function globalRange(ev: StoredEvent): { start: Date; end: Date } {
   return { start, end };
 }
 
-/** Events to paint inside a single calendar cell */
-export function getRenderEventsForDay(cellDate: Date): RenderEvent[] {
+/** События для одной ячейки календаря */
+export function getRenderEventsForDay(cellDate: Date, storedEvents: StoredEvent[]): RenderEvent[] {
   const out: RenderEvent[] = [];
   const k = dateKeyLocal(cellDate);
 

@@ -9,12 +9,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { usePortalData } from "../context/PortalDataContext";
 import {
   calendarSubtitle,
   getRenderEventsForDay,
   legendItems,
   type EventKind,
   type RenderEvent,
+  type StoredEvent,
 } from "../data/calendarMock";
 import {
   addDays,
@@ -237,12 +239,14 @@ function DayCell({
   cellDate,
   muted,
   compact,
+  storedEvents,
 }: {
   cellDate: Date;
   muted: boolean;
   compact?: boolean;
+  storedEvents: StoredEvent[];
 }) {
-  const list = getRenderEventsForDay(cellDate);
+  const list = getRenderEventsForDay(cellDate, storedEvents);
   const dayNum = cellDate.getDate();
 
   return (
@@ -302,8 +306,15 @@ function CalendarLegend() {
   );
 }
 
-function TeamPulse() {
-  const faces = ["SJ", "MT", "ER", "AK"];
+function TeamPulse({
+  efficiencyPct,
+  faces,
+  extraCount,
+}: {
+  efficiencyPct: number;
+  faces: string[];
+  extraCount: number;
+}) {
   return (
     <div
       style={{
@@ -314,14 +325,14 @@ function TeamPulse() {
         boxShadow: "var(--shadow-md)",
       }}
     >
-      <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>84%</div>
+      <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>{efficiencyPct}%</div>
       <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.9, marginBottom: 14 }}>
         Capacity this week.
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 14 }}>
         {faces.map((f, i) => (
           <div
-            key={f}
+            key={`${f}-${i}`}
             className="avatar"
             style={{
               width: 32,
@@ -351,7 +362,7 @@ function TeamPulse() {
             zIndex: 0,
           }}
         >
-          +12
+          +{extraCount}
         </div>
       </div>
       <span
@@ -374,7 +385,7 @@ function TeamPulse() {
   );
 }
 
-function ComingUp() {
+function ComingUp({ line }: { line: string | null }) {
   return (
     <div className="card" style={{ padding: "18px 18px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -382,16 +393,23 @@ function ComingUp() {
         <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Coming Up</h3>
       </div>
       <p style={{ margin: 0, fontSize: 13, color: "var(--text)", fontWeight: 500, lineHeight: 1.45 }}>
-        <strong>Marco Rossi</strong> — May 15th{" "}
-        <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>(demo)</span>
+        {line ? (
+          <strong style={{ fontWeight: 600 }}>{line}</strong>
+        ) : (
+          <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>Нет предстоящих дней рождения в базе.</span>
+        )}
       </p>
     </div>
   );
 }
 
 export function CalendarPage() {
+  const { storedEvents, staff, presenceInsights, nextBirthdayLine } = usePortalData();
   const [view, setView] = useState<"month" | "week">("month");
-  const [anchor, setAnchor] = useState(() => new Date(2024, 4, 15));
+  const [anchor, setAnchor] = useState(() => new Date());
+
+  const teamFaces = staff.slice(0, 4).map((s) => `${s.first_name[0] ?? ""}${s.last_name[0] ?? ""}`.toUpperCase());
+  const teamExtra = Math.max(0, staff.length - 4);
 
   const y = anchor.getFullYear();
   const m = anchor.getMonth();
@@ -646,6 +664,7 @@ export function CalendarPage() {
                       key={`${wi}-${ci}`}
                       cellDate={cell.d}
                       muted={!cell.inMonth}
+                      storedEvents={storedEvents}
                     />
                   ))}
                 </div>
@@ -658,7 +677,7 @@ export function CalendarPage() {
                 }}
               >
                 {weekDays.map((d, i) => (
-                  <DayCell key={i} cellDate={d} muted={false} compact />
+                  <DayCell key={i} cellDate={d} muted={false} compact storedEvents={storedEvents} />
                 ))}
               </div>
             )}
@@ -667,8 +686,12 @@ export function CalendarPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <CalendarLegend />
-          <TeamPulse />
-          <ComingUp />
+          <TeamPulse
+            efficiencyPct={presenceInsights.efficiencyPct}
+            faces={teamFaces.length ? teamFaces : ["—"]}
+            extraCount={teamExtra}
+          />
+          <ComingUp line={nextBirthdayLine} />
         </div>
       </div>
 

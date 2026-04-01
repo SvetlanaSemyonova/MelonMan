@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { schedulePeople, type ScheduleBlockType } from "../data/scheduleAbsencesMock";
+import { usePortalData } from "../context/PortalDataContext";
+import type { ScheduleBlockType } from "../data/scheduleAbsencesMock";
 import {
   addDays,
   addMonthsFirstDay,
@@ -32,6 +33,7 @@ function isWeekendColumn(year: number, monthIndex: number, dayOfMonth: number): 
 }
 
 export function TeamSchedule() {
+  const { schedulePeople } = usePortalData();
   const [view, setView] = useState<"weekly" | "monthly">("weekly");
   const [anchor, setAnchor] = useState(() => new Date());
 
@@ -286,6 +288,11 @@ export function TeamSchedule() {
                 })}
           </div>
 
+          {rows.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
+              Нет сотрудников в базе — добавьте их в разделе «Администрирование».
+            </div>
+          ) : null}
           {rows.map((row) => (
             <div
               key={row.id}

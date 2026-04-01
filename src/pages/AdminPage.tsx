@@ -1,5 +1,6 @@
 import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { UserPlus, Shield, Check } from "lucide-react";
+import { usePortalData } from "../context/PortalDataContext";
 import {
   roles,
   permissionGroups,
@@ -7,16 +8,7 @@ import {
   type UserRoleId,
   type PermissionId,
 } from "../data/adminMock";
-
-type AddedUser = {
-  id: string;
-  name: string;
-  email: string;
-  title: string;
-  role: UserRoleId;
-  permissions: PermissionId[];
-  createdAt: string;
-};
+import { supabase } from "../lib/supabaseClient";
 
 const inputStyle: CSSProperties = {
   width: "100%",
@@ -35,15 +27,31 @@ const labelStyle: CSSProperties = {
   marginBottom: 6,
 };
 
+function permissionLabels(ids: string[]): string {
+  const flat = permissionGroups.flatMap((g) => g.items);
+  return ids.map((id) => flat.find((i) => i.id === id)?.label).filter(Boolean).join(" · ");
+}
+
 export function AdminPage() {
+  const { staff, refetch } = usePortalData();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [title, setTitle] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [role, setRole] = useState<UserRoleId>("employee");
   const [permissions, setPermissions] = useState(() => buildPermissionMap("employee"));
-  const [users, setUsers] = useState<AddedUser[]>([]);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const sortedStaff = useMemo(
+    () =>
+      [...staff].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ),
+    [staff]
+  );
 
   const roleMeta = useMemo(() => roles.find((r) => r.id === role), [role]);
 
@@ -56,31 +64,51 @@ export function AdminPage() {
     setPermissions((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim() || !email.trim()) return;
+    if (!supabase) {
+      setSubmitError("Supabase не настроен.");
+      return;
+    }
 
     const enabled = (Object.entries(permissions) as [PermissionId, boolean][])
       .filter(([, v]) => v)
       .map(([k]) => k);
 
-    const entry: AddedUser = {
-      id: `u-${Date.now()}`,
-      name: `${firstName.trim()} ${lastName.trim()}`,
-      email: email.trim(),
-      title: title.trim() || "—",
-      role,
-      permissions: enabled,
-      createdAt: new Date().toLocaleString("ru-RU"),
-    };
-    setUsers((prev) => [entry, ...prev]);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2800);
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setTitle("");
-    applyRoleTemplate("employee");
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const { error } = await supabase.from("staff_profiles").insert({
+        email: email.trim().toLowerCase(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        title: title.trim(),
+        role,
+        permissions: enabled,
+        region: "",
+        employee_id: "",
+        manager_name: "",
+        joined_at: new Date().toISOString().slice(0, 10),
+        vacation_used: 0,
+        vacation_total: 20,
+        birthday: birthday.trim() || null,
+      });
+      if (error) throw error;
+      await refetch();
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 2800);
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setTitle("");
+      setBirthday("");
+      applyRoleTemplate("employee");
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -90,10 +118,26 @@ export function AdminPage() {
           Администрирование
         </h1>
         <p style={{ margin: 0, fontSize: 14, color: "var(--text-muted)" }}>
-          Добавление пользователей, назначение роли и индивидуальных прав доступа (данные только в этой
-          сессии).
+          Добавление сотрудников в таблицу <code>staff_profiles</code> в Supabase: роль и права сохраняются в базе.
         </p>
       </div>
+
+      {submitError ? (
+        <div
+          className="card"
+          style={{
+            marginBottom: 20,
+            padding: "12px 16px",
+            background: "#fef2f2",
+            borderColor: "#fecaca",
+            fontSize: 14,
+            fontWeight: 600,
+            color: "#b91c1c",
+          }}
+        >
+          {submitError}
+        </div>
+      ) : null}
 
       {savedFlash ? (
         <div
@@ -112,7 +156,7 @@ export function AdminPage() {
           }}
         >
           <Check size={18} strokeWidth={2.5} />
-          Пользователь добавлен в список ниже (демо, без сохранения на сервер).
+          Пользователь сохранён в Supabase.
         </div>
       ) : null}
 
@@ -192,6 +236,15 @@ export function AdminPage() {
               onChange={(e) => setTitle(e.target.value)}
               style={inputStyle}
               placeholder="Например, Senior Developer"
+            />
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label style={labelStyle}>День рождения (для календаря)</label>
+            <input
+              type="date"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+              style={inputStyle}
             />
           </div>
         </div>
@@ -294,8 +347,13 @@ export function AdminPage() {
         </div>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <button type="submit" className="btn btn-primary" style={{ padding: "12px 24px" }}>
-            Добавить пользователя
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ padding: "12px 24px" }}
+            disabled={submitting}
+          >
+            {submitting ? "Сохранение…" : "Добавить пользователя"}
           </button>
           <button
             type="button"
@@ -316,11 +374,12 @@ export function AdminPage() {
             fontSize: 16,
           }}
         >
-          Недавно добавленные ({users.length})
+          Сотрудники в базе ({sortedStaff.length})
         </div>
-        {users.length === 0 ? (
+        {sortedStaff.length === 0 ? (
           <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
-            Пока никого не добавляли — записи появятся здесь после отправки формы.
+            Пока нет записей — выполните SQL из <code>supabase/migrations/001_portal.sql</code> или добавьте
+            пользователя формой выше.
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
@@ -334,12 +393,14 @@ export function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {sortedStaff.map((u) => (
                   <tr key={u.id} style={{ borderTop: "1px solid var(--border)" }}>
                     <td style={{ padding: "14px 18px", verticalAlign: "top" }}>
-                      <div style={{ fontWeight: 600 }}>{u.name}</div>
+                      <div style={{ fontWeight: 600 }}>
+                        {u.first_name} {u.last_name}
+                      </div>
                       <div style={{ color: "var(--text-muted)", fontSize: 12 }}>{u.email}</div>
-                      <div style={{ color: "var(--text-muted)", fontSize: 12 }}>{u.title}</div>
+                      <div style={{ color: "var(--text-muted)", fontSize: 12 }}>{u.title || "—"}</div>
                     </td>
                     <td style={{ padding: "14px 14px", verticalAlign: "top" }}>
                       <span
@@ -364,15 +425,10 @@ export function AdminPage() {
                         maxWidth: 320,
                       }}
                     >
-                      {u.permissions.length
-                        ? u.permissions
-                            .map((id) => permissionGroups.flatMap((g) => g.items).find((i) => i.id === id)?.label)
-                            .filter(Boolean)
-                            .join(" · ")
-                        : "—"}
+                      {u.permissions?.length ? permissionLabels(u.permissions) : "—"}
                     </td>
                     <td style={{ padding: "14px 18px", verticalAlign: "top", whiteSpace: "nowrap" }}>
-                      {u.createdAt}
+                      {new Date(u.created_at).toLocaleString("ru-RU")}
                     </td>
                   </tr>
                 ))}

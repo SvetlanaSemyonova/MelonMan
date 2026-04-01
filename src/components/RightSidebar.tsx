@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Gift, Flag, Sparkles } from "lucide-react";
-import { upcomingBirthdays } from "../data/mock";
-import { getUpcomingNationalHolidays } from "../data/nationalHolidaysCalendarMock";
+import { usePortalData } from "../context/PortalDataContext";
+import { getUpcomingNationalHolidaysFromDb } from "../lib/nationalHolidaysFromDb";
 import { BirthdayCalendarModal } from "./BirthdayCalendarModal";
 import { NationalHolidaysCalendarModal } from "./NationalHolidaysCalendarModal";
 
@@ -60,9 +60,10 @@ function ToggleRow({
 }
 
 export function RightSidebar() {
+  const { staff, nationalHolidays, upcomingBirthdaysWidget } = usePortalData();
   const [birthdayModalOpen, setBirthdayModalOpen] = useState(false);
   const [nationalModalOpen, setNationalModalOpen] = useState(false);
-  const nationalWidgetItems = getUpcomingNationalHolidays(3);
+  const nationalWidgetItems = getUpcomingNationalHolidaysFromDb(nationalHolidays, 3);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -95,7 +96,12 @@ export function RightSidebar() {
           THIS WEEK
         </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {upcomingBirthdays.map((b) => (
+          {upcomingBirthdaysWidget.length === 0 ? (
+            <li style={{ padding: "14px 0", fontSize: 13, color: "var(--text-muted)" }}>
+              Укажите дни рождения у сотрудников (админка или таблица).
+            </li>
+          ) : null}
+          {upcomingBirthdaysWidget.map((b) => (
             <li
               key={b.id}
               style={{
@@ -126,7 +132,11 @@ export function RightSidebar() {
         </ul>
       </button>
 
-      <BirthdayCalendarModal open={birthdayModalOpen} onClose={() => setBirthdayModalOpen(false)} />
+      <BirthdayCalendarModal
+        open={birthdayModalOpen}
+        onClose={() => setBirthdayModalOpen(false)}
+        staff={staff}
+      />
 
       <button
         type="button"
@@ -172,7 +182,11 @@ export function RightSidebar() {
         </ul>
       </button>
 
-      <NationalHolidaysCalendarModal open={nationalModalOpen} onClose={() => setNationalModalOpen(false)} />
+      <NationalHolidaysCalendarModal
+        open={nationalModalOpen}
+        onClose={() => setNationalModalOpen(false)}
+        nationalRows={nationalHolidays}
+      />
 
       <div
         style={{

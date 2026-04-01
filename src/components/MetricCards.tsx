@@ -1,43 +1,43 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plane, Stethoscope, Home, X } from "lucide-react";
-import { metrics } from "../data/mock";
-import { randomEmployeeNames } from "../data/metricEmployeeNames";
-
-type MetricKey = "onHoliday" | "sickLeave" | "oooRemote";
-
-const items = [
-  {
-    key: "onHoliday" as const,
-    label: "On Holiday",
-    value: metrics.onHoliday,
-    icon: Plane,
-    color: "var(--holiday)",
-    bg: "var(--holiday-bg)",
-  },
-  {
-    key: "sickLeave" as const,
-    label: "Sick Leave",
-    value: metrics.sickLeave,
-    icon: Stethoscope,
-    color: "var(--sick)",
-    bg: "var(--sick-bg)",
-  },
-  {
-    key: "oooRemote" as const,
-    label: "OOO / Remote",
-    value: metrics.oooRemote,
-    icon: Home,
-    color: "var(--remote)",
-    bg: "var(--remote-bg)",
-  },
-];
+import { usePortalData } from "../context/PortalDataContext";
+import type { MetricKey } from "../lib/portalDerive";
 
 export function MetricCards() {
+  const { metrics, metricModalList } = usePortalData();
   const [openKey, setOpenKey] = useState<MetricKey | null>(null);
-  const [listSeed, setListSeed] = useState(0);
+
+  const items = useMemo(
+    () => [
+      {
+        key: "onHoliday" as const,
+        label: "On Holiday",
+        value: metrics.onHoliday,
+        icon: Plane,
+        color: "var(--holiday)",
+        bg: "var(--holiday-bg)",
+      },
+      {
+        key: "sickLeave" as const,
+        label: "Sick Leave",
+        value: metrics.sickLeave,
+        icon: Stethoscope,
+        color: "var(--sick)",
+        bg: "var(--sick-bg)",
+      },
+      {
+        key: "oooRemote" as const,
+        label: "OOO / Remote",
+        value: metrics.oooRemote,
+        icon: Home,
+        color: "var(--remote)",
+        bg: "var(--remote-bg)",
+      },
+    ],
+    [metrics]
+  );
 
   const openModal = useCallback((key: MetricKey) => {
-    setListSeed((s) => s + 1);
     setOpenKey(key);
   }, []);
 
@@ -45,11 +45,9 @@ export function MetricCards() {
 
   const activeItem = openKey ? items.find((i) => i.key === openKey) : null;
   const employeeList = useMemo(() => {
-    if (!openKey || !activeItem) return [];
-    const seed =
-      (openKey === "onHoliday" ? 1 : openKey === "sickLeave" ? 2 : 3) * 100_000 + listSeed * 17;
-    return randomEmployeeNames(activeItem.value, seed);
-  }, [openKey, activeItem, listSeed]);
+    if (!openKey) return [];
+    return metricModalList(openKey);
+  }, [openKey, metricModalList]);
 
   useEffect(() => {
     if (!openKey) return;

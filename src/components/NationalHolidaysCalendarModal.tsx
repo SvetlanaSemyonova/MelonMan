@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { X, ChevronLeft, ChevronRight, Flag } from "lucide-react";
-import { nationalHolidaysOnDay } from "../data/nationalHolidaysCalendarMock";
+import type { NationalHolidayRow } from "../lib/portalTypes";
+import { nationalHolidaysOnDayFromDb } from "../lib/nationalHolidaysFromDb";
 import { addMonthsFirstDay, buildMonthGrid, formatMonthYear } from "../lib/calendarUtils";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -8,9 +9,10 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 type Props = {
   open: boolean;
   onClose: () => void;
+  nationalRows: NationalHolidayRow[];
 };
 
-export function NationalHolidaysCalendarModal({ open, onClose }: Props) {
+export function NationalHolidaysCalendarModal({ open, onClose, nationalRows }: Props) {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [monthIndex, setMonthIndex] = useState(() => new Date().getMonth());
 
@@ -215,7 +217,7 @@ export function NationalHolidaysCalendarModal({ open, onClose }: Props) {
             {cells.map((cell, idx) => {
               const m = cell.d.getMonth();
               const day = cell.d.getDate();
-              const hol = nationalHolidaysOnDay(m, day);
+              const hol = nationalHolidaysOnDayFromDb(nationalRows, m, day);
               const muted = !cell.inMonth;
               const todayCell = isToday(cell.d);
 

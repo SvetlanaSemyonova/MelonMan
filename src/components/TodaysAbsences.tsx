@@ -1,4 +1,5 @@
-import { todaysAbsences, type TodayAbsence } from "../data/mock";
+import { usePortalData } from "../context/PortalDataContext";
+import type { TodayAbsence } from "../data/mock";
 
 function pillClass(status: TodayAbsence["status"]) {
   if (status === "Holiday") return "pill pill-holiday";
@@ -7,12 +8,18 @@ function pillClass(status: TodayAbsence["status"]) {
 }
 
 export function TodaysAbsences() {
+  const { todaysAbsences } = usePortalData();
   return (
     <div className="card" style={{ padding: "22px 24px", marginBottom: 24 }}>
       <h2 style={{ margin: "0 0 18px", fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
         Today&apos;s Absences
       </h2>
       <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        {todaysAbsences.length === 0 ? (
+          <li style={{ padding: "14px 0", color: "var(--text-muted)", fontSize: 14 }}>
+            Нет отсутствий на сегодня.
+          </li>
+        ) : null}
         {todaysAbsences.map((row) => (
           <li
             key={row.id}

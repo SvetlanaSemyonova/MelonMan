@@ -9,17 +9,21 @@ import {
   PenLine,
   Plus,
 } from "lucide-react";
-import {
-  profileUser,
-  vacationBalance,
-  absenceHistory,
-  regionalHolidays,
-  leaveTypesProfile,
-} from "../data/profileMock";
+import { usePortalData } from "../context/PortalDataContext";
+import { formatJoined } from "../lib/portalDerive";
 
-function VacationDonut() {
-  const { used, total, left } = vacationBalance;
-  const pct = used / total;
+const leaveTypesProfile = ["Vacation Leave", "Sick Leave", "Birthday Leave", "Personal"];
+
+function VacationDonut({
+  used,
+  total,
+  left,
+}: {
+  used: number;
+  total: number;
+  left: number;
+}) {
+  const pct = total > 0 ? used / total : 0;
   const r = 52;
   const c = 2 * Math.PI * r;
   const dash = c * pct;
@@ -103,7 +107,16 @@ function TypeIcon({ variant }: { variant: "vacation" | "medical" | "birthday" })
 }
 
 export function ProfilePage() {
-  const u = profileUser;
+  const { viewer, absenceHistory, regionalHolidaysProfile, vacationBalance } = usePortalData();
+  const u = viewer;
+
+  if (!u) {
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)" }}>
+        Нет данных профиля. Добавьте сотрудников в Supabase или выполните SQL-миграцию.
+      </div>
+    );
+  }
 
   return (
     <>
@@ -184,7 +197,7 @@ export function ProfilePage() {
               <div style={{ flex: 1, minWidth: 200 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                   <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>
-                    {u.firstName} {u.lastName}
+                    {u.first_name} {u.last_name}
                   </h2>
                   <span
                     style={{
@@ -216,7 +229,7 @@ export function ProfilePage() {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <MapPin size={16} color="var(--holiday)" />
-                      {u.region}
+                      {u.region || "—"}
                     </div>
                   </div>
                   <div>
@@ -225,20 +238,20 @@ export function ProfilePage() {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <BadgeCheck size={16} color="var(--text-muted)" />
-                      {u.employeeId}
+                      {u.employee_id || "—"}
                     </div>
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
                       Direct Manager
                     </div>
-                    <div style={{ fontWeight: 500 }}>{u.manager}</div>
+                    <div style={{ fontWeight: 500 }}>{u.manager_name || "—"}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
                       Joined Date
                     </div>
-                    <div style={{ fontWeight: 500 }}>{u.joined}</div>
+                    <div style={{ fontWeight: 500 }}>{formatJoined(u.joined_at)}</div>
                   </div>
                 </div>
               </div>
@@ -247,7 +260,11 @@ export function ProfilePage() {
 
           <div className="card" style={{ padding: "22px 24px" }}>
             <h2 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700 }}>Vacation Balance</h2>
-            <VacationDonut />
+            <VacationDonut
+              used={vacationBalance.used}
+              total={vacationBalance.total}
+              left={vacationBalance.left}
+            />
           </div>
         </div>
 
@@ -373,7 +390,7 @@ export function ProfilePage() {
               </button>
             </div>
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-              {regionalHolidays.map((h) => (
+              {regionalHolidaysProfile.map((h) => (
                 <li
                   key={h.id}
                   style={{
