@@ -9,6 +9,7 @@ import {
   PenLine,
   Plus,
   UserCircle,
+  Briefcase,
 } from "lucide-react";
 import { usePortalData } from "../context/PortalDataContext";
 import { formatJoined } from "../lib/portalDerive";
@@ -254,7 +255,15 @@ export function ProfilePage() {
                     ACTIVE
                   </span>
                 </div>
-                <p style={{ margin: "6px 0 18px", fontSize: 14, color: "var(--text-muted)" }}>{u.title}</p>
+                <p style={{ margin: "6px 0 18px", fontSize: 14, color: "var(--text-muted)" }}>
+                  {u.title}
+                  {u.department ? (
+                    <>
+                      {u.title ? <span style={{ margin: "0 8px", color: "var(--border)" }}>·</span> : null}
+                      <span style={{ color: "var(--primary)", fontWeight: 600 }}>{u.department}</span>
+                    </>
+                  ) : null}
+                </p>
                 <div
                   style={{
                     display: "grid",
@@ -289,6 +298,15 @@ export function ProfilePage() {
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <BadgeCheck size={16} color="var(--text-muted)" />
                       {u.country_legal || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+                      Department
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+                      <Briefcase size={16} color="var(--primary)" />
+                      {u.department || "—"}
                     </div>
                   </div>
                   <div>

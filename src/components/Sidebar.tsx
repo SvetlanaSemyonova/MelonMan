@@ -1,33 +1,22 @@
-import {
-  LayoutDashboard,
-  Calendar,
-  User,
-  Settings,
-  Shield,
-  Building2,
-} from "lucide-react";
+import { LayoutDashboard, Calendar, User, Settings, Shield } from "lucide-react";
 import { MelonStaffMark } from "./MelonStaffMark";
 
-export type SidebarRoute = "dashboard" | "calendar" | "profile" | "admin";
+export type SidebarRoute = "dashboard" | "calendar" | "profile" | "settings" | "admin";
 
 const nav = [
   { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
   { id: "calendar" as const, label: "Calendar", icon: Calendar },
   { id: "profile" as const, label: "Profile", icon: User },
-  { id: "settings" as const, label: "Settings", icon: Settings, disabled: true },
+  { id: "settings" as const, label: "Settings", icon: Settings },
   { id: "admin" as const, label: "Admin", icon: Shield },
 ];
 
 export function Sidebar({
   active,
   onNavigate,
-  orgName,
-  planName,
 }: {
   active: SidebarRoute;
   onNavigate: (route: SidebarRoute) => void;
-  orgName: string;
-  planName: string;
 }) {
   return (
     <aside
@@ -82,15 +71,7 @@ export function Sidebar({
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                if (item.disabled) return;
-                if (
-                  item.id === "dashboard" ||
-                  item.id === "calendar" ||
-                  item.id === "profile" ||
-                  item.id === "admin"
-                ) {
-                  onNavigate(item.id);
-                }
+                onNavigate(item.id);
               }}
               style={{
                 display: "flex",
@@ -107,8 +88,8 @@ export function Sidebar({
                 borderLeft: isActive ? "3px solid var(--holiday)" : "3px solid transparent",
                 marginLeft: isActive ? 0 : 3,
                 paddingLeft: isActive ? 11 : 14,
-                cursor: item.disabled ? "default" : "pointer",
-                opacity: item.disabled ? 0.45 : 1,
+                cursor: "pointer",
+                opacity: 1,
               }}
             >
               <Icon size={18} strokeWidth={isActive ? 2.25 : 2} />
@@ -117,39 +98,6 @@ export function Sidebar({
           );
         })}
       </nav>
-
-      <div style={{ padding: 16 }}>
-        <div
-          className="card"
-          style={{
-            padding: 14,
-            boxShadow: "var(--shadow)",
-            border: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 10,
-          }}
-        >
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: "var(--bg)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Building2 size={18} color="var(--primary)" />
-          </div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{orgName}</div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{planName}</div>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

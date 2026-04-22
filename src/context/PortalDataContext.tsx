@@ -20,19 +20,20 @@ import {
   computePresenceInsights,
   computeSickBalance,
   getUpcomingBirthdayWidgetItems,
-  pickViewerStaff,
   regionalRowsToProfileFormat,
   staffForMetricModal,
   staffToTeamBirthdays,
   type MetricKey,
   type TeamBirthdayItem,
 } from "../lib/portalDerive";
+import { useAuth } from "./AuthContext";
 import type {
   AbsenceRow,
   CalendarEventRow,
   NationalHolidayRow,
   RegionalHolidayDbRow,
   StaffProfile,
+  StaffProfileChangeRow,
 } from "../lib/portalTypes";
 import { supabase } from "../lib/supabaseClient";
 
@@ -58,6 +59,7 @@ type PortalDataContextValue = {
   upcomingBirthdaysWidget: ReturnType<typeof getUpcomingBirthdayWidgetItems>;
   presenceInsights: ReturnType<typeof computePresenceInsights>;
   nextBirthdayLine: string | null;
+  staffChanges: StaffProfileChangeRow[];
 };
 
 const PortalDataContext = createContext<PortalDataContextValue | null>(null);
@@ -70,17 +72,23 @@ async function fetchAll() {
       national: [] as NationalHolidayRow[],
       regional: [] as RegionalHolidayDbRow[],
       calendar: [] as CalendarEventRow[],
+      staffChanges: [] as StaffProfileChangeRow[],
       error:
         "Нет переменных VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY. В корне проекта создайте файл .env (скопируйте из .env.example), вставьте ключ из Supabase → Settings → API и перезапустите npm run dev.",
     };
   }
 
-  const [st, ab, na, re, ca] = await Promise.all([
+  const [st, ab, na, re, ca, ch] = await Promise.all([
     supabase.from("staff_profiles").select("*").order("created_at", { ascending: true }),
     supabase.from("absences").select("*").order("start_date", { ascending: false }),
     supabase.from("national_holidays").select("*"),
     supabase.from("regional_holidays").select("*"),
     supabase.from("calendar_events").select("*"),
+    supabase
+      .from("staff_profile_changes")
+      .select("*")
+      .order("changed_at", { ascending: false })
+      .limit(300),
   ]);
 
   const err =
@@ -89,6 +97,7 @@ async function fetchAll() {
     na.error?.message ||
     re.error?.message ||
     ca.error?.message ||
+    // Audit table missing is not fatal — degrade gracefully.
     null;
 
   return {
@@ -97,6 +106,7 @@ async function fetchAll() {
     national: (na.data ?? []) as NationalHolidayRow[],
     regional: (re.data ?? []) as RegionalHolidayDbRow[],
     calendar: (ca.data ?? []) as CalendarEventRow[],
+    staffChanges: (ch.data ?? []) as StaffProfileChangeRow[],
     error: err,
   };
 }
@@ -107,6 +117,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
   const [national, setNational] = useState<NationalHolidayRow[]>([]);
   const [regional, setRegional] = useState<RegionalHolidayDbRow[]>([]);
   const [calendar, setCalendar] = useState<CalendarEventRow[]>([]);
+  const [staffChanges, setStaffChanges] = useState<StaffProfileChangeRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,15 +129,33 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
     setNational(res.national);
     setRegional(res.regional);
     setCalendar(res.calendar);
+    setStaffChanges(res.staffChanges);
     setError(res.error);
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const { authStaffId, authReady } = useAuth();
 
-  const viewer = useMemo(() => pickViewerStaff(staff), [staff]);
+  useEffect(() => {
+    if (!authReady) return;
+    if (!authStaffId) {
+      // Logged out — drop any cached data.
+      setStaff([]);
+      setAbsences([]);
+      setNational([]);
+      setRegional([]);
+      setCalendar([]);
+      setStaffChanges([]);
+      setLoading(false);
+      return;
+    }
+    void load();
+  }, [authReady, authStaffId, load]);
+
+  const viewer = useMemo(
+    () => (authStaffId ? staff.find((s) => s.id === authStaffId) ?? null : null),
+    [staff, authStaffId]
+  );
 
   const storedEvents = useMemo(
     () => buildMergedStoredEvents(staff, absences, national, calendar),
@@ -202,6 +231,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       upcomingBirthdaysWidget,
       presenceInsights,
       nextBirthdayLine,
+      staffChanges,
     }),
     [
       loading,
@@ -210,6 +240,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       viewer,
       load,
       absences,
+      staffChanges,
       storedEvents,
       schedulePeople,
       metrics,

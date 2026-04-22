@@ -9,6 +9,7 @@ import {
   type PermissionId,
 } from "../data/adminMock";
 import { COUNTRIES_RU } from "../data/countriesRu";
+import { DEPARTMENTS } from "../data/departments";
 import { supabase } from "../lib/supabaseClient";
 
 const HOLIDAY_COUNTRIES = [
@@ -352,6 +353,7 @@ export function AdminPage() {
   const [personalNote, setPersonalNote] = useState("");
   const [vacationTotal, setVacationTotal] = useState(20);
   const [sickTotal, setSickTotal] = useState(10);
+  const [department, setDepartment] = useState<string>(DEPARTMENTS[0]);
   const [role, setRole] = useState<UserRoleId>("employee");
   const [permissions, setPermissions] = useState(() => buildPermissionMap("employee"));
   const [savedFlash, setSavedFlash] = useState(false);
@@ -402,8 +404,12 @@ export function AdminPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
+      const normalisedEmail = email.trim().toLowerCase();
       const { error } = await supabase.from("staff_profiles").insert({
-        email: email.trim().toLowerCase(),
+        email: normalisedEmail,
+        login: normalisedEmail,
+        password: "melon_user",
+        must_change_password: true,
         first_name: firstName.trim(),
         middle_name: middleName.trim(),
         last_name: lastName.trim(),
@@ -422,6 +428,7 @@ export function AdminPage() {
         country_residence: countryResidence.trim(),
         country_legal: countryLegal.trim(),
         personal_note: personalNote.trim(),
+        department,
       });
       if (error) throw error;
       await refetch();
@@ -441,6 +448,7 @@ export function AdminPage() {
       setPersonalNote("");
       setVacationTotal(20);
       setSickTotal(10);
+      setDepartment(DEPARTMENTS[0]);
       applyRoleTemplate("employee");
     } catch (err: unknown) {
       setSubmitError(err instanceof Error ? err.message : String(err));
@@ -617,7 +625,7 @@ export function AdminPage() {
               placeholder="ivan@company.com"
             />
           </div>
-          <div style={{ gridColumn: "1 / -1" }}>
+          <div>
             <label style={labelStyle}>Должность</label>
             <input
               value={title}
@@ -625,6 +633,21 @@ export function AdminPage() {
               style={inputStyle}
               placeholder="Например, Senior Developer"
             />
+          </div>
+          <div>
+            <label style={labelStyle}>Отдел *</label>
+            <select
+              required
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              style={{ ...inputStyle, cursor: "pointer", background: "var(--surface)" }}
+            >
+              {DEPARTMENTS.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label style={labelStyle}>День рождения</label>
@@ -662,12 +685,18 @@ export function AdminPage() {
           </div>
           <div>
             <label style={labelStyle}>Страна проживания</label>
-            <input
+            <select
               value={countryResidence}
               onChange={(e) => setCountryResidence(e.target.value)}
-              style={inputStyle}
-              placeholder="Польша"
-            />
+              style={{ ...inputStyle, background: "var(--surface)", cursor: "pointer" }}
+            >
+              <option value="">— Не указано —</option>
+              {COUNTRIES_RU.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label style={labelStyle}>Юрисдикция ИП / контракт</label>

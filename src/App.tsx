@@ -5,8 +5,13 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { AdminPage } from "./pages/AdminPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { LoginPage } from "./pages/LoginPage";
+import { ChangePasswordPage } from "./pages/ChangePasswordPage";
+import { InviteAcceptPage } from "./pages/InviteAcceptPage";
 import { BackgroundShader } from "./components/BackgroundShader";
 import { usePortalData } from "./context/PortalDataContext";
+import { useAuth } from "./context/AuthContext";
 
 function roleLabel(role: string | undefined): string | undefined {
   if (role === "admin") return "Administrator";
@@ -18,13 +23,40 @@ function roleLabel(role: string | undefined): string | undefined {
 export default function App() {
   const [route, setRoute] = useState<SidebarRoute>("dashboard");
   const { viewer, error, loading } = usePortalData();
+  const { authStaffId, authReady } = useAuth();
 
-  const sidebarFooter =
-    route === "profile"
-      ? { orgName: "Presence Org", planName: "Enterprise Plan" }
-      : route === "calendar"
-        ? { orgName: "Architecture Global", planName: "Enterprise Plan" }
-        : { orgName: "Acme Global", planName: "Premium Account" };
+  if (!authReady) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--text-muted)",
+          fontSize: 14,
+        }}
+      >
+        Загружаем сессию…
+      </div>
+    );
+  }
+
+  const inviteToken =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("invite")
+      : null;
+  if (inviteToken) {
+    return <InviteAcceptPage token={inviteToken} />;
+  }
+
+  if (!authStaffId) {
+    return <LoginPage />;
+  }
+
+  if (viewer?.must_change_password) {
+    return <ChangePasswordPage />;
+  }
 
   const searchPlaceholder =
     route === "profile"
@@ -49,12 +81,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar
-        active={route}
-        onNavigate={setRoute}
-        orgName={sidebarFooter.orgName}
-        planName={sidebarFooter.planName}
-      />
+      <Sidebar active={route} onNavigate={setRoute} />
       <div className="main-wrap">
         {error ? (
           <div
@@ -90,6 +117,8 @@ export default function App() {
                 <CalendarPage />
               ) : route === "profile" ? (
                 <ProfilePage />
+              ) : route === "settings" ? (
+                <SettingsPage />
               ) : (
                 <AdminPage />
               )}

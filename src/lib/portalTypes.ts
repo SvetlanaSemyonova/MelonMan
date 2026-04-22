@@ -19,6 +19,12 @@ export type StaffProfile = {
   country_residence: string;
   country_legal: string;
   personal_note: string;
+  department: string;
+  login: string | null;
+  password: string | null;
+  must_change_password: boolean;
+  invite_token: string | null;
+  invite_expires_at: string | null;
   created_at: string;
 };
 
@@ -52,6 +58,16 @@ export type RegionalHolidayDbRow = {
   region: string;
   meta: string;
   variant: "upcoming" | "past";
+};
+
+export type StaffProfileChangeRow = {
+  id: string;
+  staff_id: string | null;
+  changed_by: string | null;
+  changed_at: string;
+  field: string;
+  old_value: string | null;
+  new_value: string | null;
 };
 
 export type CalendarEventRow = {
