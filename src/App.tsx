@@ -23,24 +23,7 @@ function roleLabel(role: string | undefined): string | undefined {
 export default function App() {
   const [route, setRoute] = useState<SidebarRoute>("dashboard");
   const { viewer, error, loading } = usePortalData();
-  const { authStaffId, authReady } = useAuth();
-
-  if (!authReady) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "var(--text-muted)",
-          fontSize: 14,
-        }}
-      >
-Загружаем сессию…
-      </div>
-    );
-  }
+  const { authStaffId } = useAuth();
 
   const inviteToken =
     typeof window !== "undefined"

@@ -2,7 +2,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -20,19 +19,20 @@ const AuthContext = createContext<AuthValue | null>(null);
 
 const STORAGE_KEY = "melonman.authStaffId";
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [authStaffId, setAuthStaffId] = useState<string | null>(null);
-  const [authReady, setAuthReady] = useState(false);
+function readStoredStaffId(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setAuthStaffId(saved);
-    } catch {
-      // ignore — localStorage may be disabled (private mode, etc.)
-    }
-    setAuthReady(true);
-  }, []);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  // Synchronous init — first paint already knows whether a session exists,
+  // so the login screen is shown as the default landing instead of a
+  // throwaway "loading session" splash.
+  const [authStaffId, setAuthStaffId] = useState<string | null>(() => readStoredStaffId());
+  const authReady = true;
 
   const signIn = useCallback<AuthValue["signIn"]>(async (login, password) => {
     if (!supabase) {
