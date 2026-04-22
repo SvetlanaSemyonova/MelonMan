@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   Globe,
   ChevronDown,
@@ -8,13 +8,18 @@ import {
   PartyPopper,
   ChevronLeft,
   ChevronRight,
+  CalendarRange,
+  Palmtree,
 } from "lucide-react";
+import { usePortalData } from "../context/PortalDataContext";
+import { YearVacationView } from "../components/YearVacationView";
 import {
   calendarSubtitle,
   getRenderEventsForDay,
   legendItems,
-  type EventKind,
+  type LegendKind,
   type RenderEvent,
+  type StoredEvent,
 } from "../data/calendarMock";
 import {
   addDays,
@@ -29,36 +34,60 @@ import {
 
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-const eventStyles: Record<
-  EventKind,
-  { bar?: string; text: string; border?: string }
-> = {
-  national: {
-    bar: "linear-gradient(90deg, #7c3aed 0%, #8b5cf6 100%)",
-    text: "#5b21b6",
-  },
-  sick: {
-    bar: "#fce7f3",
-    text: "#be185d",
-    border: "1px solid #f9a8d4",
-  },
-  holiday: {
-    bar: "linear-gradient(90deg, #bfdbfe 0%, #93c5fd 100%)",
-    text: "#1d4ed8",
-  },
-  birthday: {
-    bar: "#e9d5ff",
-    text: "#6b21a8",
-    border: "1px solid #d8b4fe",
-  },
-  event: {
-    bar: "#dbeafe",
-    text: "#1e40af",
-    border: "1px solid #93c5fd",
-  },
+// Country → flag/emoji. Keys match the `country` column values seeded in migration 004.
+const countryFlag: Record<string, string> = {
+  Global: "🌍",
+  "Польша": "🇵🇱",
+  "Беларусь": "🇧🇾",
+  "Россия": "🇷🇺",
+  "Кипр": "🇨🇾",
+  "Сербия": "🇷🇸",
+  "Болгария": "🇧🇬",
 };
 
-function LegendSwatch({ kind }: { kind: EventKind | "birthdayLegend" }) {
+const FILTERABLE_COUNTRIES = [
+  "Global",
+  "Польша",
+  "Беларусь",
+  "Россия",
+  "Кипр",
+  "Сербия",
+  "Болгария",
+];
+
+function flagFor(country: string | undefined): string {
+  if (!country) return "";
+  return countryFlag[country] ?? "";
+}
+
+// Two visual families: OOO (any personal absence) and Public Holiday (national).
+// Birthday stays as a small celebration marker.
+const oooStyle = {
+  bg: "linear-gradient(90deg, #fce7f3 0%, #fbcfe8 100%)",
+  bar: "linear-gradient(90deg, #f9a8d4 0%, #f472b6 100%)",
+  text: "#be185d",
+  border: "1px solid #f9a8d4",
+};
+
+const publicHolidayStyle = {
+  bar: "linear-gradient(90deg, #990FFA 0%, #E60076 100%)",
+  text: "#7c08c4",
+  bgSoft: "#f3e8ff",
+};
+
+const birthdayStyle = {
+  bg: "#f3e8ff",
+  text: "#6b21a8",
+  border: "1px solid #d8b4fe",
+};
+
+const eventStyle = {
+  bg: "var(--primary-bg)",
+  text: "#4c1d95",
+  border: "1px solid #c4b5fd",
+};
+
+function LegendSwatch({ kind }: { kind: LegendKind }) {
   if (kind === "birthdayLegend") {
     return (
       <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -75,15 +104,28 @@ function LegendSwatch({ kind }: { kind: EventKind | "birthdayLegend" }) {
       </span>
     );
   }
-  const s = eventStyles[kind];
+  if (kind === "ooo") {
+    return (
+      <span
+        style={{
+          width: 20,
+          height: 14,
+          borderRadius: 4,
+          background: oooStyle.bg,
+          border: oooStyle.border,
+          display: "inline-block",
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
   return (
     <span
       style={{
-        width: 14,
+        width: 20,
         height: 14,
         borderRadius: 4,
-        background: s.bar,
-        border: s.border || "none",
+        background: publicHolidayStyle.bar,
         display: "inline-block",
         flexShrink: 0,
       }}
@@ -92,42 +134,72 @@ function LegendSwatch({ kind }: { kind: EventKind | "birthdayLegend" }) {
 }
 
 function renderEventChip(ev: RenderEvent) {
-  const st = eventStyles[ev.kind];
-
+  // Public Holiday — prominent purple→pink gradient bar.
   if (ev.kind === "national" && ev.nationalStyle === "bar") {
+    const flag = flagFor(ev.country);
+    const tooltip = ev.country
+      ? `Public Holiday (${ev.country}) — ${ev.label}`
+      : `Public Holiday — ${ev.label}`;
     return (
       <div
         key={ev.id}
+        title={tooltip}
         style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
           fontSize: 10,
           fontWeight: 700,
           color: "#fff",
-          background: st.bar,
+          background: publicHolidayStyle.bar,
           padding: "4px 6px",
           borderRadius: 6,
-          textAlign: "center",
           lineHeight: 1.2,
+          boxShadow: "0 2px 6px -2px rgba(153, 15, 250, 0.4)",
+          letterSpacing: "0.02em",
+          overflow: "hidden",
         }}
       >
-        {ev.label}
+        {flag ? <span style={{ flexShrink: 0 }}>{flag}</span> : null}
+        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {ev.label}
+        </span>
       </div>
     );
   }
   if (ev.kind === "national") {
+    const flag = flagFor(ev.country);
+    const tooltip = ev.country
+      ? `Public Holiday (${ev.country}) — ${ev.label}`
+      : `Public Holiday — ${ev.label}`;
     return (
       <div
         key={ev.id}
+        title={tooltip}
         style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
           fontSize: 10,
-          fontWeight: 600,
-          color: st.text,
-          padding: "2px 0",
+          fontWeight: 700,
+          color: "#fff",
+          background: publicHolidayStyle.bar,
+          padding: "3px 6px",
+          borderRadius: 6,
+          lineHeight: 1.2,
+          letterSpacing: "0.02em",
+          overflow: "hidden",
         }}
       >
-        {ev.label}
+        {flag ? <span style={{ flexShrink: 0 }}>{flag}</span> : null}
+        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {ev.label}
+        </span>
       </div>
     );
   }
+
+  // Multi-day vacation — OOO bar spanning days.
   if (ev.kind === "holiday" && ev.spanRole) {
     const r =
       ev.spanRole === "single"
@@ -140,49 +212,71 @@ function renderEventChip(ev: RenderEvent) {
     return (
       <div
         key={ev.id}
-        title="Leave"
+        title={ev.label ? `OOO — ${ev.label}` : "OOO — Leave"}
         style={{
           height: 22,
-          background: st.bar,
+          background: oooStyle.bar,
           ...r,
           border: "none",
+          display: "flex",
+          alignItems: "center",
+          paddingLeft: ev.spanRole === "start" || ev.spanRole === "single" ? 6 : 0,
+          fontSize: 10,
+          fontWeight: 600,
+          color: "#fff",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          letterSpacing: "0.02em",
         }}
-      />
+      >
+        {ev.spanRole === "start" || ev.spanRole === "single" ? (ev.label || "OOO") : ""}
+      </div>
     );
   }
+
+  // Single-day vacation chip — OOO.
   if (ev.kind === "holiday" && ev.label) {
     return (
       <div
         key={ev.id}
-        style={{
-          fontSize: 10,
-          fontWeight: 600,
-          color: st.text,
-          background: "#dbeafe",
-          padding: "3px 6px",
-          borderRadius: 6,
-          border: "1px solid #93c5fd",
-        }}
-      >
-        {ev.label}
-      </div>
-    );
-  }
-  if (ev.kind === "sick") {
-    return (
-      <div
-        key={ev.id}
+        title={`OOO — ${ev.label}`}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 4,
           fontSize: 10,
           fontWeight: 600,
-          color: st.text,
-          background: st.bar,
+          color: oooStyle.text,
+          background: oooStyle.bg,
           padding: "3px 6px",
           borderRadius: 6,
-          border: st.border,
+          border: oooStyle.border,
+        }}
+      >
+        <Palmtree size={10} strokeWidth={2.5} />
+        {ev.label}
+      </div>
+    );
+  }
+
+  // Sick — OOO family, same pink but with cross icon to hint sub-type.
+  if (ev.kind === "sick") {
+    return (
+      <div
+        key={ev.id}
+        title={`OOO — Sick — ${ev.label}`}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          fontSize: 10,
+          fontWeight: 600,
+          color: oooStyle.text,
+          background: oooStyle.bg,
+          padding: "3px 6px",
+          borderRadius: 6,
+          border: oooStyle.border,
         }}
       >
         <Cross size={10} strokeWidth={3} />
@@ -190,21 +284,24 @@ function renderEventChip(ev: RenderEvent) {
       </div>
     );
   }
+
+  // Birthday — small celebration marker.
   if (ev.kind === "birthday") {
     return (
       <div
         key={ev.id}
+        title={`Birthday — ${ev.label}`}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 4,
           fontSize: 10,
           fontWeight: 600,
-          color: st.text,
-          background: st.bar,
+          color: birthdayStyle.text,
+          background: birthdayStyle.bg,
           padding: "3px 6px",
           borderRadius: 6,
-          border: st.border,
+          border: birthdayStyle.border,
         }}
       >
         <Star size={10} fill="#a855f7" color="#a855f7" />
@@ -212,6 +309,7 @@ function renderEventChip(ev: RenderEvent) {
       </div>
     );
   }
+
   if (ev.kind === "event") {
     return (
       <div
@@ -219,11 +317,11 @@ function renderEventChip(ev: RenderEvent) {
         style={{
           fontSize: 10,
           fontWeight: 600,
-          color: st.text,
-          background: st.bar,
+          color: eventStyle.text,
+          background: eventStyle.bg,
           padding: "3px 6px",
           borderRadius: 6,
-          border: st.border,
+          border: eventStyle.border,
         }}
       >
         {ev.label}
@@ -237,12 +335,14 @@ function DayCell({
   cellDate,
   muted,
   compact,
+  storedEvents,
 }: {
   cellDate: Date;
   muted: boolean;
   compact?: boolean;
+  storedEvents: StoredEvent[];
 }) {
-  const list = getRenderEventsForDay(cellDate);
+  const list = getRenderEventsForDay(cellDate, storedEvents);
   const dayNum = cellDate.getDate();
 
   return (
@@ -285,16 +385,33 @@ function CalendarLegend() {
             key={row.key}
             style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               gap: 10,
-              padding: "8px 0",
+              padding: "10px 0",
               fontSize: 12,
               color: "var(--text-muted)",
               borderTop: idx === 0 ? "none" : "1px solid var(--border)",
             }}
           >
-            <LegendSwatch kind={row.kind === "birthdayLegend" ? "birthdayLegend" : row.kind} />
-            <span style={{ color: "var(--text)", fontWeight: 500 }}>{row.label}</span>
+            <span style={{ paddingTop: 3 }}>
+              <LegendSwatch kind={row.kind} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: "var(--text)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                {row.label}
+                {row.kind === "ooo" ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: oooStyle.text }}>
+                    <Palmtree size={11} strokeWidth={2.5} />
+                    <Cross size={11} strokeWidth={3} />
+                  </span>
+                ) : null}
+              </div>
+              {row.hint ? (
+                <div style={{ marginTop: 2, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.4 }}>
+                  {row.hint}
+                </div>
+              ) : null}
+            </div>
           </li>
         ))}
       </ul>
@@ -302,33 +419,40 @@ function CalendarLegend() {
   );
 }
 
-function TeamPulse() {
-  const faces = ["SJ", "MT", "ER", "AK"];
+function TeamPulse({
+  efficiencyPct,
+  faces,
+  extraCount,
+}: {
+  efficiencyPct: number;
+  faces: string[];
+  extraCount: number;
+}) {
   return (
     <div
       style={{
         borderRadius: "var(--radius)",
-        background: "linear-gradient(160deg, var(--navy) 0%, #243a5e 100%)",
+        background: "var(--gradient-primary)",
         color: "#fff",
         padding: "20px 18px",
         boxShadow: "var(--shadow-md)",
       }}
     >
-      <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>84%</div>
+      <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>{efficiencyPct}%</div>
       <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.9, marginBottom: 14 }}>
         Capacity this week.
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 14 }}>
         {faces.map((f, i) => (
           <div
-            key={f}
+            key={`${f}-${i}`}
             className="avatar"
             style={{
               width: 32,
               height: 32,
               fontSize: 10,
               marginLeft: i > 0 ? -8 : 0,
-              border: "2px solid #243a5e",
+              border: "2px solid var(--primary)",
               zIndex: 4 - i,
             }}
           >
@@ -347,11 +471,11 @@ function TeamPulse() {
             justifyContent: "center",
             fontSize: 10,
             fontWeight: 700,
-            border: "2px solid #243a5e",
+            border: "2px solid var(--primary)",
             zIndex: 0,
           }}
         >
-          +12
+          +{extraCount}
         </div>
       </div>
       <span
@@ -374,7 +498,7 @@ function TeamPulse() {
   );
 }
 
-function ComingUp() {
+function ComingUp({ line }: { line: string | null }) {
   return (
     <div className="card" style={{ padding: "18px 18px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -382,16 +506,66 @@ function ComingUp() {
         <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Coming Up</h3>
       </div>
       <p style={{ margin: 0, fontSize: 13, color: "var(--text)", fontWeight: 500, lineHeight: 1.45 }}>
-        <strong>Marco Rossi</strong> — May 15th{" "}
-        <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>(demo)</span>
+        {line ? (
+          <strong style={{ fontWeight: 600 }}>{line}</strong>
+        ) : (
+          <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>Нет предстоящих дней рождения в базе.</span>
+        )}
       </p>
     </div>
   );
 }
 
 export function CalendarPage() {
-  const [view, setView] = useState<"month" | "week">("month");
-  const [anchor, setAnchor] = useState(() => new Date(2024, 4, 15));
+  const { storedEvents, staff, presenceInsights, nextBirthdayLine } = usePortalData();
+  const [view, setView] = useState<"month" | "week" | "year">("month");
+  const [anchor, setAnchor] = useState(() => new Date());
+  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(
+    () => new Set(FILTERABLE_COUNTRIES)
+  );
+  const [countryMenuOpen, setCountryMenuOpen] = useState(false);
+  const countryMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!countryMenuOpen) return;
+    function onClick(e: MouseEvent) {
+      if (!countryMenuRef.current) return;
+      if (!countryMenuRef.current.contains(e.target as Node)) {
+        setCountryMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [countryMenuOpen]);
+
+  const filteredStoredEvents = useMemo(
+    () =>
+      storedEvents.filter((ev) => {
+        if (ev.kind !== "national") return true;
+        if (!ev.country) return true;
+        return selectedCountries.has(ev.country);
+      }),
+    [storedEvents, selectedCountries]
+  );
+
+  function toggleCountry(c: string) {
+    setSelectedCountries((prev) => {
+      const next = new Set(prev);
+      if (next.has(c)) next.delete(c);
+      else next.add(c);
+      return next;
+    });
+  }
+
+  function countryTriggerLabel(): string {
+    if (selectedCountries.size === FILTERABLE_COUNTRIES.length) return "All countries";
+    if (selectedCountries.size === 0) return "No countries";
+    if (selectedCountries.size === 1) return Array.from(selectedCountries)[0];
+    return `${selectedCountries.size} countries`;
+  }
+
+  const teamFaces = staff.slice(0, 4).map((s) => `${s.first_name[0] ?? ""}${s.last_name[0] ?? ""}`.toUpperCase());
+  const teamExtra = Math.max(0, staff.length - 4);
 
   const y = anchor.getFullYear();
   const m = anchor.getMonth();
@@ -413,12 +587,16 @@ export function CalendarPage() {
   );
 
   const title =
-    view === "month"
-      ? formatMonthYear(y, m)
-      : formatWeekRange(weekMonday);
+    view === "year"
+      ? `${y} г.`
+      : view === "month"
+        ? formatMonthYear(y, m)
+        : formatWeekRange(weekMonday);
 
   function goPrev() {
-    if (view === "month") {
+    if (view === "year") {
+      setAnchor(new Date(y - 1, 0, 1));
+    } else if (view === "month") {
       setAnchor(addMonthsFirstDay(y, m, -1));
     } else {
       setAnchor(addDays(weekMonday, -7));
@@ -426,7 +604,9 @@ export function CalendarPage() {
   }
 
   function goNext() {
-    if (view === "month") {
+    if (view === "year") {
+      setAnchor(new Date(y + 1, 0, 1));
+    } else if (view === "month") {
       setAnchor(addMonthsFirstDay(y, m, 1));
     } else {
       setAnchor(addDays(weekMonday, 7));
@@ -435,7 +615,11 @@ export function CalendarPage() {
 
   function goToday() {
     const t = new Date();
-    setAnchor(new Date(t.getFullYear(), t.getMonth(), t.getDate()));
+    if (view === "year") {
+      setAnchor(new Date(t.getFullYear(), 0, 1));
+    } else {
+      setAnchor(new Date(t.getFullYear(), t.getMonth(), t.getDate()));
+    }
   }
 
   const selectStyle: CSSProperties = {
@@ -451,7 +635,56 @@ export function CalendarPage() {
 
   return (
     <>
-      <div style={{ maxWidth: 1440, margin: "0 auto 20px" }}>
+      <div style={{ maxWidth: 1440, margin: "0 auto 24px" }}>
+        <section className="hero-gradient" style={{ marginBottom: 24 }}>
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 24,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ maxWidth: 560 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "5px 12px",
+                  borderRadius: 999,
+                  background: "rgba(255, 255, 255, 0.18)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  marginBottom: 14,
+                }}
+              >
+                <CalendarRange size={13} />
+                {title}
+              </div>
+              <h1
+                style={{
+                  margin: "0 0 8px",
+                  fontSize: 32,
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Team Calendar
+              </h1>
+              <p style={{ margin: 0, fontSize: 15, opacity: 0.88, lineHeight: 1.5 }}>
+                {calendarSubtitle}
+              </p>
+            </div>
+          </div>
+        </section>
         <div
           style={{
             display: "flex",
@@ -462,15 +695,7 @@ export function CalendarPage() {
           }}
         >
           <div style={{ flex: "1 1 220px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                flexWrap: "wrap",
-                marginBottom: 8,
-              }}
-            >
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -480,18 +705,6 @@ export function CalendarPage() {
               >
                 <ChevronLeft size={20} />
               </button>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 26,
-                  fontWeight: 700,
-                  color: "var(--navy)",
-                  flex: "1 1 auto",
-                  minWidth: 0,
-                }}
-              >
-                {title}
-              </h1>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -501,23 +714,33 @@ export function CalendarPage() {
               >
                 <ChevronRight size={20} />
               </button>
-            </div>
-            <p style={{ margin: 0, fontSize: 14, color: "var(--text-muted)" }}>{calendarSubtitle}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 14, alignItems: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500 }}>
-                Month
-                <select
-                  value={m}
-                  style={selectStyle}
-                  onChange={(e) => setAnchor(new Date(y, Number(e.target.value), 1))}
+              {view !== "year" ? (
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500 }}>
+                  Month
+                  <select
+                    value={m}
+                    style={selectStyle}
+                    onChange={(e) => setAnchor(new Date(y, Number(e.target.value), 1))}
+                  >
+                    {MONTH_NAMES.map((name, idx) => (
+                      <option key={name} value={idx}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "var(--primary)",
+                    padding: "0 4px",
+                  }}
                 >
-                  {MONTH_NAMES.map((name, idx) => (
-                    <option key={name} value={idx}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  {title}
+                </span>
+              )}
               <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500 }}>
                 Year
                 <select
@@ -547,7 +770,7 @@ export function CalendarPage() {
                 border: "1px solid var(--border)",
               }}
             >
-              {(["month", "week"] as const).map((v) => (
+              {(["month", "week", "year"] as const).map((v) => (
                 <button
                   key={v}
                   type="button"
@@ -558,7 +781,7 @@ export function CalendarPage() {
                     fontSize: 13,
                     fontWeight: 600,
                     textTransform: "capitalize",
-                    background: view === v ? "var(--navy)" : "transparent",
+                    background: view === v ? "var(--primary)" : "transparent",
                     color: view === v ? "#fff" : "var(--text-muted)",
                     border: "none",
                     borderRadius: 8,
@@ -568,25 +791,125 @@ export function CalendarPage() {
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "8px 14px",
-                fontWeight: 600,
-              }}
-            >
-              <Globe size={18} color="var(--navy)" />
-              United Kingdom
-              <ChevronDown size={16} color="var(--text-muted)" />
-            </button>
+            <div style={{ position: "relative" }} ref={countryMenuRef}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setCountryMenuOpen((v) => !v)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 14px",
+                  fontWeight: 600,
+                }}
+              >
+                <Globe size={18} color="var(--primary)" />
+                {countryTriggerLabel()}
+                <ChevronDown
+                  size={16}
+                  color="var(--text-muted)"
+                  style={{
+                    transform: countryMenuOpen ? "rotate(180deg)" : "none",
+                    transition: "transform 0.15s",
+                  }}
+                />
+              </button>
+              {countryMenuOpen ? (
+                <div
+                  className="card"
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 6px)",
+                    right: 0,
+                    zIndex: 20,
+                    minWidth: 240,
+                    padding: "10px 6px",
+                    boxShadow: "0 20px 48px -16px rgba(15, 23, 42, 0.3)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "2px 10px 8px",
+                      borderBottom: "1px solid var(--border)",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCountries(new Set(FILTERABLE_COUNTRIES))}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--primary)",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                    >
+                      Select all
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCountries(new Set())}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--text-muted)",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                    {FILTERABLE_COUNTRIES.map((c) => {
+                      const checked = selectedCountries.has(c);
+                      return (
+                        <li key={c}>
+                          <label
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              padding: "8px 10px",
+                              borderRadius: 6,
+                              cursor: "pointer",
+                              fontSize: 13,
+                              fontWeight: 500,
+                              background: checked ? "var(--primary-bg)" : "transparent",
+                              color: checked ? "var(--primary)" : "var(--text)",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleCountry(c)}
+                              style={{ width: 14, height: 14, cursor: "pointer" }}
+                            />
+                            <span style={{ fontSize: 16 }}>{countryFlag[c] ?? ""}</span>
+                            <span style={{ flex: 1 }}>{c}</span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
 
+      {view === "year" ? (
+        <YearVacationView year={y} />
+      ) : (
       <div className="content-grid">
         <div>
           <div
@@ -646,6 +969,7 @@ export function CalendarPage() {
                       key={`${wi}-${ci}`}
                       cellDate={cell.d}
                       muted={!cell.inMonth}
+                      storedEvents={filteredStoredEvents}
                     />
                   ))}
                 </div>
@@ -658,7 +982,7 @@ export function CalendarPage() {
                 }}
               >
                 {weekDays.map((d, i) => (
-                  <DayCell key={i} cellDate={d} muted={false} compact />
+                  <DayCell key={i} cellDate={d} muted={false} compact storedEvents={filteredStoredEvents} />
                 ))}
               </div>
             )}
@@ -667,10 +991,15 @@ export function CalendarPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <CalendarLegend />
-          <TeamPulse />
-          <ComingUp />
+          <TeamPulse
+            efficiencyPct={presenceInsights.efficiencyPct}
+            faces={teamFaces.length ? teamFaces : ["—"]}
+            extraCount={teamExtra}
+          />
+          <ComingUp line={nextBirthdayLine} />
         </div>
       </div>
+      )}
 
       <button
         type="button"
@@ -686,7 +1015,7 @@ export function CalendarPage() {
           padding: 0,
           fontSize: 24,
           lineHeight: 1,
-          boxShadow: "0 8px 24px rgba(26, 43, 75, 0.35)",
+          boxShadow: "0 8px 24px rgba(153, 15, 250, 0.35)",
           zIndex: 40,
         }}
       >

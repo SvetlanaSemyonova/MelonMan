@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { X, ChevronLeft, ChevronRight, Gift } from "lucide-react";
-import { birthdaysOnDay } from "../data/birthdayCalendarMock";
+import type { StaffProfile } from "../lib/portalTypes";
+import { birthdaysOnDayFromStaff } from "../lib/portalDerive";
 import { addMonthsFirstDay, buildMonthGrid, formatMonthYear } from "../lib/calendarUtils";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -8,9 +9,10 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 type Props = {
   open: boolean;
   onClose: () => void;
+  staff: StaffProfile[];
 };
 
-export function BirthdayCalendarModal({ open, onClose }: Props) {
+export function BirthdayCalendarModal({ open, onClose, staff }: Props) {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [monthIndex, setMonthIndex] = useState(() => new Date().getMonth());
 
@@ -117,7 +119,7 @@ export function BirthdayCalendarModal({ open, onClose }: Props) {
                   width: 40,
                   height: 40,
                   borderRadius: 10,
-                  background: "#ede9fe",
+                  background: "var(--secondary-bg)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -163,7 +165,7 @@ export function BirthdayCalendarModal({ open, onClose }: Props) {
             >
               <ChevronLeft size={20} />
             </button>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--navy)", minWidth: 200, textAlign: "center" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--primary)", minWidth: 200, textAlign: "center" }}>
               {formatMonthYear(year, monthIndex)}
             </div>
             <button
@@ -215,7 +217,7 @@ export function BirthdayCalendarModal({ open, onClose }: Props) {
             {cells.map((cell, idx) => {
               const m = cell.d.getMonth();
               const day = cell.d.getDate();
-              const bdays = birthdaysOnDay(m, day);
+              const bdays = birthdaysOnDayFromStaff(staff, m, day);
               const muted = !cell.inMonth;
               const todayCell = isToday(cell.d);
 

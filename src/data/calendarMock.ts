@@ -22,9 +22,11 @@ export interface StoredEvent {
   end?: string;
   /** National holiday: full purple bar vs text line */
   nationalStyle?: "bar" | "text";
+  /** National holidays: country name ("Польша", "Global", etc.) */
+  country?: string;
 }
 
-/** Absolute-date events (demo data — May 2024 mock + samples on other months) */
+/** Демо-массив (календарь в приложении берёт события из Supabase через PortalDataProvider). */
 export const storedEvents: StoredEvent[] = [
   { id: "s1", kind: "sick", label: "Sarah J.", start: "2024-05-02" },
   {
@@ -57,6 +59,7 @@ export interface RenderEvent {
   label: string;
   spanRole?: "start" | "middle" | "end" | "single";
   nationalStyle?: "bar" | "text";
+  country?: string;
 }
 
 function globalRange(ev: StoredEvent): { start: Date; end: Date } {
@@ -65,8 +68,8 @@ function globalRange(ev: StoredEvent): { start: Date; end: Date } {
   return { start, end };
 }
 
-/** Events to paint inside a single calendar cell */
-export function getRenderEventsForDay(cellDate: Date): RenderEvent[] {
+/** События для одной ячейки календаря */
+export function getRenderEventsForDay(cellDate: Date, storedEvents: StoredEvent[]): RenderEvent[] {
   const out: RenderEvent[] = [];
   const k = dateKeyLocal(cellDate);
 
@@ -101,15 +104,27 @@ export function getRenderEventsForDay(cellDate: Date): RenderEvent[] {
       kind: ev.kind,
       label: ev.label,
       nationalStyle: ev.nationalStyle,
+      country: ev.country,
     });
   }
 
   return out;
 }
 
-export const legendItems: { key: string; label: string; kind: EventKind | "birthdayLegend" }[] = [
-  { key: "holiday", label: "Holiday (Amber)", kind: "holiday" },
-  { key: "sick", label: "Sick (Red)", kind: "sick" },
-  { key: "national", label: "National Holiday (Purple)", kind: "national" },
+export type LegendKind = "ooo" | "publicHoliday" | "birthdayLegend";
+
+export const legendItems: { key: string; label: string; hint?: string; kind: LegendKind }[] = [
+  {
+    key: "ooo",
+    label: "OOO — Out of Office",
+    hint: "Sick, vacation, birthday leave & other personal absences",
+    kind: "ooo",
+  },
+  {
+    key: "publicHoliday",
+    label: "Public Holiday",
+    hint: "National & regional holidays — everyone is off",
+    kind: "publicHoliday",
+  },
   { key: "birthday", label: "Birthday", kind: "birthdayLegend" },
 ];

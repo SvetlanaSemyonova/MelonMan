@@ -3,10 +3,11 @@ type Props = {
 };
 
 /** Пиксель-арт иконка Melon Sandbox (предоставленный ассет). */
-export function MelonManMark({ size = 44 }: Props) {
+export function MelonStaffMark({ size = 44 }: Props) {
+  const src = `${import.meta.env.BASE_URL}melonman-icon.png`;
   return (
     <img
-      src="/melonman-icon.png"
+      src={src}
       width={size}
       height={size}
       alt=""

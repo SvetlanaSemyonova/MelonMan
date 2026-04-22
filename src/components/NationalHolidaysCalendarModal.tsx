@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { X, ChevronLeft, ChevronRight, Flag } from "lucide-react";
-import { nationalHolidaysOnDay } from "../data/nationalHolidaysCalendarMock";
+import type { NationalHolidayRow } from "../lib/portalTypes";
+import { nationalHolidaysOnDayFromDb } from "../lib/nationalHolidaysFromDb";
 import { addMonthsFirstDay, buildMonthGrid, formatMonthYear } from "../lib/calendarUtils";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -8,9 +9,10 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 type Props = {
   open: boolean;
   onClose: () => void;
+  nationalRows: NationalHolidayRow[];
 };
 
-export function NationalHolidaysCalendarModal({ open, onClose }: Props) {
+export function NationalHolidaysCalendarModal({ open, onClose, nationalRows }: Props) {
   const [year, setYear] = useState(() => new Date().getFullYear());
   const [monthIndex, setMonthIndex] = useState(() => new Date().getMonth());
 
@@ -117,7 +119,7 @@ export function NationalHolidaysCalendarModal({ open, onClose }: Props) {
                   width: 40,
                   height: 40,
                   borderRadius: 10,
-                  background: "#dbeafe",
+                  background: "var(--primary-bg)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -163,7 +165,7 @@ export function NationalHolidaysCalendarModal({ open, onClose }: Props) {
             >
               <ChevronLeft size={20} />
             </button>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--navy)", minWidth: 200, textAlign: "center" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--primary)", minWidth: 200, textAlign: "center" }}>
               {formatMonthYear(year, monthIndex)}
             </div>
             <button
@@ -215,7 +217,7 @@ export function NationalHolidaysCalendarModal({ open, onClose }: Props) {
             {cells.map((cell, idx) => {
               const m = cell.d.getMonth();
               const day = cell.d.getDate();
-              const hol = nationalHolidaysOnDay(m, day);
+              const hol = nationalHolidaysOnDayFromDb(nationalRows, m, day);
               const muted = !cell.inMonth;
               const todayCell = isToday(cell.d);
 

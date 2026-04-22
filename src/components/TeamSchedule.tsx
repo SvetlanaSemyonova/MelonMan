@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { schedulePeople, type ScheduleBlockType } from "../data/scheduleAbsencesMock";
+import { usePortalData } from "../context/PortalDataContext";
+import type { ScheduleBlockType } from "../data/scheduleAbsencesMock";
 import {
   addDays,
   addMonthsFirstDay,
@@ -16,10 +17,10 @@ const typeColors: Record<
   ScheduleBlockType,
   { bg: string; border: string; text: string }
 > = {
-  holiday: { bg: "rgba(59, 130, 246, 0.22)", border: "var(--holiday)", text: "#1d4ed8" },
-  sick: { bg: "rgba(239, 68, 68, 0.16)", border: "var(--sick)", text: "#b91c1c" },
-  remote: { bg: "rgba(100, 116, 139, 0.2)", border: "var(--remote)", text: "#475569" },
-  bday: { bg: "rgba(124, 58, 237, 0.16)", border: "var(--birthday)", text: "#6d28d9" },
+  holiday: { bg: "rgba(153, 15, 250, 0.15)", border: "var(--holiday)", text: "#7c08c4" },
+  sick: { bg: "rgba(220, 38, 38, 0.14)", border: "var(--sick)", text: "#b91c1c" },
+  remote: { bg: "rgba(107, 114, 128, 0.18)", border: "var(--remote)", text: "#4b5563" },
+  bday: { bg: "rgba(230, 0, 118, 0.14)", border: "var(--birthday)", text: "#be185d" },
 };
 
 const dayHeaderFmt = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric" });
@@ -32,6 +33,7 @@ function isWeekendColumn(year: number, monthIndex: number, dayOfMonth: number): 
 }
 
 export function TeamSchedule() {
+  const { schedulePeople } = usePortalData();
   const [view, setView] = useState<"weekly" | "monthly">("weekly");
   const [anchor, setAnchor] = useState(() => new Date());
 
@@ -163,7 +165,7 @@ export function TeamSchedule() {
                 fontSize: 12,
                 fontWeight: 600,
                 textTransform: "capitalize",
-                background: view === v ? "var(--navy)" : "transparent",
+                background: view === v ? "var(--primary)" : "transparent",
                 color: view === v ? "#fff" : "var(--text-muted)",
                 border: "none",
                 borderRadius: 6,
@@ -195,7 +197,7 @@ export function TeamSchedule() {
           >
             <ChevronLeft size={18} />
           </button>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--navy)", minWidth: 160, textAlign: "center" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--primary)", minWidth: 160, textAlign: "center" }}>
             {rangeLabel}
           </span>
           <button
@@ -286,6 +288,11 @@ export function TeamSchedule() {
                 })}
           </div>
 
+          {rows.length === 0 ? (
+            <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
+              Нет сотрудников в базе — добавьте их в разделе «Администрирование».
+            </div>
+          ) : null}
           {rows.map((row) => (
             <div
               key={row.id}

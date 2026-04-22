@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Gift, Flag, Sparkles } from "lucide-react";
-import { upcomingBirthdays } from "../data/mock";
-import { getUpcomingNationalHolidays } from "../data/nationalHolidaysCalendarMock";
+import { usePortalData } from "../context/PortalDataContext";
+import { getUpcomingNationalHolidaysFromDb } from "../lib/nationalHolidaysFromDb";
 import { BirthdayCalendarModal } from "./BirthdayCalendarModal";
 import { NationalHolidaysCalendarModal } from "./NationalHolidaysCalendarModal";
 
@@ -60,9 +60,10 @@ function ToggleRow({
 }
 
 export function RightSidebar() {
+  const { staff, nationalHolidays, upcomingBirthdaysWidget } = usePortalData();
   const [birthdayModalOpen, setBirthdayModalOpen] = useState(false);
   const [nationalModalOpen, setNationalModalOpen] = useState(false);
-  const nationalWidgetItems = getUpcomingNationalHolidays(3);
+  const nationalWidgetItems = getUpcomingNationalHolidaysFromDb(nationalHolidays, 3);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -95,7 +96,12 @@ export function RightSidebar() {
           THIS WEEK
         </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {upcomingBirthdays.map((b) => (
+          {upcomingBirthdaysWidget.length === 0 ? (
+            <li style={{ padding: "14px 0", fontSize: 13, color: "var(--text-muted)" }}>
+              Укажите дни рождения у сотрудников (админка или таблица).
+            </li>
+          ) : null}
+          {upcomingBirthdaysWidget.map((b) => (
             <li
               key={b.id}
               style={{
@@ -109,7 +115,7 @@ export function RightSidebar() {
               <div
                 className="avatar avatar-sm"
                 style={{
-                  background: "linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)",
+                  background: "var(--gradient-surface)",
                   color: "var(--birthday)",
                 }}
               >
@@ -126,7 +132,11 @@ export function RightSidebar() {
         </ul>
       </button>
 
-      <BirthdayCalendarModal open={birthdayModalOpen} onClose={() => setBirthdayModalOpen(false)} />
+      <BirthdayCalendarModal
+        open={birthdayModalOpen}
+        onClose={() => setBirthdayModalOpen(false)}
+        staff={staff}
+      />
 
       <button
         type="button"
@@ -140,7 +150,7 @@ export function RightSidebar() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-          <Flag size={18} color="var(--navy)" />
+          <Flag size={18} color="var(--primary)" />
           <span style={{ fontWeight: 700, fontSize: 15 }}>National Holidays</span>
         </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
@@ -172,19 +182,23 @@ export function RightSidebar() {
         </ul>
       </button>
 
-      <NationalHolidaysCalendarModal open={nationalModalOpen} onClose={() => setNationalModalOpen(false)} />
+      <NationalHolidaysCalendarModal
+        open={nationalModalOpen}
+        onClose={() => setNationalModalOpen(false)}
+        nationalRows={nationalHolidays}
+      />
 
       <div
         style={{
           borderRadius: "var(--radius)",
-          background: "linear-gradient(160deg, var(--navy) 0%, #243a5e 100%)",
+          background: "var(--gradient-primary)",
           color: "#fff",
           padding: "20px 18px",
           boxShadow: "var(--shadow-md)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <Sparkles size={18} color="#93c5fd" />
+          <Sparkles size={18} color="var(--primary-bg)" />
           <span style={{ fontWeight: 700, fontSize: 15 }}>Lead Insights</span>
         </div>
         <p style={{ margin: "0 0 8px", fontSize: 12, opacity: 0.85, lineHeight: 1.45 }}>

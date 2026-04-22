@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CalendarDays, Check } from "lucide-react";
-import { absenceTypes } from "../data/mock";
+import { usePortalData } from "../context/PortalDataContext";
+import { supabase } from "../lib/supabaseClient";
+import { mapQuickRequestTypeToCategory } from "../lib/portalDerive";
 
 const TOAST_MS = 4200;
 
+const absenceTypes = ["Vacation", "Sick Leave", "Remote / OOO", "Personal", "B-Day Leave"];
+
 export function QuickRequest() {
+  const { viewer, refetch } = usePortalData();
   const [toast, setToast] = useState<string | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -23,11 +28,44 @@ export function QuickRequest() {
     }, TOAST_MS);
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const type = (form.elements.namedItem("absenceType") as HTMLSelectElement).value;
-    showToast(`Request sent: ${type} (demo)`);
+    const startDate = (form.elements.namedItem("startDate") as HTMLInputElement).value;
+    const endDate = (form.elements.namedItem("endDate") as HTMLInputElement).value;
+    if (!viewer) {
+      showToast("Нет профиля сотрудника в базе.");
+      return;
+    }
+    if (!supabase) {
+      showToast("Supabase не подключён.");
+      return;
+    }
+    if (!startDate || !endDate) {
+      showToast("Укажите даты начала и окончания.");
+      return;
+    }
+    const category = mapQuickRequestTypeToCategory(type);
+    const { error } = await supabase.from("absences").insert({
+      staff_id: viewer.id,
+      category,
+      label: type,
+      start_date: startDate,
+      end_date: endDate,
+      status: "Pending",
+      detail: "Quick Request",
+    });
+    if (error) {
+      showToast(error.message);
+      return;
+    }
+    await refetch();
+    showToast(`Заявка отправлена: ${type}`);
+    form.reset();
+    const today = new Date().toISOString().slice(0, 10);
+    (form.elements.namedItem("startDate") as HTMLInputElement).value = today;
+    (form.elements.namedItem("endDate") as HTMLInputElement).value = today;
   }
 
   return (
@@ -75,7 +113,7 @@ export function QuickRequest() {
             <input
               name="startDate"
               type="date"
-              defaultValue="2025-10-24"
+              defaultValue={new Date().toISOString().slice(0, 10)}
               style={{
                 padding: "10px 12px",
                 borderRadius: "var(--radius-sm)",
@@ -88,7 +126,7 @@ export function QuickRequest() {
             <input
               name="endDate"
               type="date"
-              defaultValue="2025-10-28"
+              defaultValue={new Date().toISOString().slice(0, 10)}
               style={{
                 padding: "10px 12px",
                 borderRadius: "var(--radius-sm)",
@@ -139,7 +177,7 @@ export function QuickRequest() {
             gap: 12,
             padding: "14px 18px",
             borderRadius: "var(--radius)",
-            background: "var(--navy)",
+            background: "var(--primary)",
             color: "#fff",
             fontSize: 14,
             fontWeight: 600,
