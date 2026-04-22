@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(open -a \"Google Chrome\" http://localhost:5173/)",
+      "Bash(npx typeui.sh pull gradient)",
+      "Bash(npx typeui.sh pull gradient --target claude-code)",
+      "Bash(npx typeui.sh pull gradient --help)",
+      "Bash(npx typeui.sh pull gradient --providers claude-code)",
+      "Bash(lsof -ti:5173)",
+      "WebFetch(domain:21st.dev)",
+      "Bash(npm install *)"
+    ]
+  }
+}

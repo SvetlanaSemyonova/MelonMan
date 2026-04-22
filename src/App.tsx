@@ -5,6 +5,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { AdminPage } from "./pages/AdminPage";
+import { BackgroundShader } from "./components/BackgroundShader";
 import { usePortalData } from "./context/PortalDataContext";
 
 function roleLabel(role: string | undefined): string | undefined {
@@ -80,15 +81,20 @@ export default function App() {
           showStatusDot={route === "calendar"}
         />
         <div className="content-scroll">
-          {route === "dashboard" ? (
-            <DashboardPage />
-          ) : route === "calendar" ? (
-            <CalendarPage />
-          ) : route === "profile" ? (
-            <ProfilePage />
-          ) : (
-            <AdminPage />
-          )}
+          <div style={{ position: "relative", minHeight: "100%" }}>
+            <BackgroundShader />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              {route === "dashboard" ? (
+                <DashboardPage />
+              ) : route === "calendar" ? (
+                <CalendarPage />
+              ) : route === "profile" ? (
+                <ProfilePage />
+              ) : (
+                <AdminPage />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

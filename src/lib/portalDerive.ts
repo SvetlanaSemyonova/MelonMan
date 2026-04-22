@@ -138,6 +138,37 @@ export function absenceTypeVariant(cat: AbsenceRow["category"]): AbsenceHistoryR
   return "vacation";
 }
 
+// Yearly sick-leave allowance. Change here to tune the default, or later move
+// to per-staff fields (sick_total/sick_used) on staff_profiles.
+export const SICK_DAYS_PER_YEAR = 10;
+
+export function computeSickBalance(
+  staffId: string,
+  absences: AbsenceRow[],
+  totalPerYear: number = SICK_DAYS_PER_YEAR,
+  year: number = new Date().getFullYear()
+): { used: number; total: number; left: number } {
+  const yearStart = `${year}-01-01`;
+  const yearEnd = `${year}-12-31`;
+  let used = 0;
+  for (const a of absences) {
+    if (a.staff_id !== staffId) continue;
+    if (a.category !== "sick") continue;
+    const start = compareKeys(a.start_date, yearStart) < 0 ? yearStart : a.start_date;
+    const end = compareKeys(a.end_date, yearEnd) > 0 ? yearEnd : a.end_date;
+    if (compareKeys(start, end) > 0) continue;
+    const d1 = parseYMD(start);
+    const d2 = parseYMD(end);
+    const days = Math.round((d2.getTime() - d1.getTime()) / 86400000) + 1;
+    used += Math.max(0, days);
+  }
+  return {
+    used,
+    total: totalPerYear,
+    left: Math.max(0, totalPerYear - used),
+  };
+}
+
 export function buildAbsenceHistoryForStaff(staffId: string, absences: AbsenceRow[]): AbsenceHistoryRow[] {
   return absences
     .filter((a) => a.staff_id === staffId)

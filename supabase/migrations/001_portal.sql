@@ -1,4 +1,4 @@
--- MelonMan: таблицы портала + открытые RLS для anon (замените политиками под auth, когда появится вход).
+-- MelonStaff: таблицы портала + открытые RLS для anon (замените политиками под auth, когда появится вход).
 -- Выполните в Supabase: SQL Editor → New query → вставьте весь файл → Run.
 
 create table if not exists public.staff_profiles (

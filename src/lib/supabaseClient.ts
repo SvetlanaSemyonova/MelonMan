@@ -5,7 +5,7 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!url || !anonKey) {
   console.warn(
-    "[MelonMan] Задайте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в .env (см. .env.example)."
+    "[MelonStaff] Задайте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в .env (см. .env.example)."
   );
 }
 

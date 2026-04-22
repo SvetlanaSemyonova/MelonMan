@@ -18,6 +18,7 @@ import {
   buildTodaysAbsences,
   computeMetrics,
   computePresenceInsights,
+  computeSickBalance,
   getUpcomingBirthdayWidgetItems,
   pickViewerStaff,
   regionalRowsToProfileFormat,
@@ -42,6 +43,7 @@ type PortalDataContextValue = {
   staff: StaffProfile[];
   viewer: StaffProfile | null;
   refetch: () => Promise<void>;
+  absences: AbsenceRow[];
   storedEvents: StoredEvent[];
   schedulePeople: SchedulePersonRow[];
   metrics: ReturnType<typeof computeMetrics>;
@@ -51,6 +53,7 @@ type PortalDataContextValue = {
   regionalHolidaysProfile: ReturnType<typeof regionalRowsToProfileFormat>;
   absenceHistory: AbsenceHistoryRow[];
   vacationBalance: { used: number; total: number; left: number };
+  sickBalance: { used: number; total: number; left: number };
   teamBirthdays: TeamBirthdayItem[];
   upcomingBirthdaysWidget: ReturnType<typeof getUpcomingBirthdayWidgetItems>;
   presenceInsights: ReturnType<typeof computePresenceInsights>;
@@ -158,6 +161,11 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
     };
   }, [viewer]);
 
+  const sickBalance = useMemo(() => {
+    if (!viewer) return { used: 0, total: 10, left: 10 };
+    return computeSickBalance(viewer.id, absences, viewer.sick_total);
+  }, [viewer, absences]);
+
   const teamBirthdays = useMemo(() => staffToTeamBirthdays(staff), [staff]);
 
   const upcomingBirthdaysWidget = useMemo(() => getUpcomingBirthdayWidgetItems(staff, 3), [staff]);
@@ -179,6 +187,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       staff,
       viewer,
       refetch: load,
+      absences,
       storedEvents,
       schedulePeople,
       metrics,
@@ -188,6 +197,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       regionalHolidaysProfile,
       absenceHistory,
       vacationBalance,
+      sickBalance,
       teamBirthdays,
       upcomingBirthdaysWidget,
       presenceInsights,
@@ -199,6 +209,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       staff,
       viewer,
       load,
+      absences,
       storedEvents,
       schedulePeople,
       metrics,
@@ -208,6 +219,7 @@ export function PortalDataProvider({ children }: { children: ReactNode }) {
       regionalHolidaysProfile,
       absenceHistory,
       vacationBalance,
+      sickBalance,
       teamBirthdays,
       upcomingBirthdaysWidget,
       presenceInsights,

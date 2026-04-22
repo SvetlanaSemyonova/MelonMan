@@ -177,7 +177,7 @@ export function QuickRequest() {
             gap: 12,
             padding: "14px 18px",
             borderRadius: "var(--radius)",
-            background: "var(--navy)",
+            background: "var(--primary)",
             color: "#fff",
             fontSize: 14,
             fontWeight: 600,

@@ -119,7 +119,7 @@ export function BirthdayCalendarModal({ open, onClose, staff }: Props) {
                   width: 40,
                   height: 40,
                   borderRadius: 10,
-                  background: "#ede9fe",
+                  background: "var(--secondary-bg)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -165,7 +165,7 @@ export function BirthdayCalendarModal({ open, onClose, staff }: Props) {
             >
               <ChevronLeft size={20} />
             </button>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--navy)", minWidth: 200, textAlign: "center" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--primary)", minWidth: 200, textAlign: "center" }}>
               {formatMonthYear(year, monthIndex)}
             </div>
             <button

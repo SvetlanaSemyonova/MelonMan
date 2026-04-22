@@ -119,7 +119,7 @@ export function NationalHolidaysCalendarModal({ open, onClose, nationalRows }: P
                   width: 40,
                   height: 40,
                   borderRadius: 10,
-                  background: "#dbeafe",
+                  background: "var(--primary-bg)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -165,7 +165,7 @@ export function NationalHolidaysCalendarModal({ open, onClose, nationalRows }: P
             >
               <ChevronLeft size={20} />
             </button>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--navy)", minWidth: 200, textAlign: "center" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--primary)", minWidth: 200, textAlign: "center" }}>
               {formatMonthYear(year, monthIndex)}
             </div>
             <button

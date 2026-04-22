@@ -115,7 +115,7 @@ export function RightSidebar() {
               <div
                 className="avatar avatar-sm"
                 style={{
-                  background: "linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)",
+                  background: "var(--gradient-surface)",
                   color: "var(--birthday)",
                 }}
               >
@@ -150,7 +150,7 @@ export function RightSidebar() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-          <Flag size={18} color="var(--navy)" />
+          <Flag size={18} color="var(--primary)" />
           <span style={{ fontWeight: 700, fontSize: 15 }}>National Holidays</span>
         </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
@@ -191,14 +191,14 @@ export function RightSidebar() {
       <div
         style={{
           borderRadius: "var(--radius)",
-          background: "linear-gradient(160deg, var(--navy) 0%, #243a5e 100%)",
+          background: "var(--gradient-primary)",
           color: "#fff",
           padding: "20px 18px",
           boxShadow: "var(--shadow-md)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-          <Sparkles size={18} color="#93c5fd" />
+          <Sparkles size={18} color="var(--primary-bg)" />
           <span style={{ fontWeight: 700, fontSize: 15 }}>Lead Insights</span>
         </div>
         <p style={{ margin: "0 0 8px", fontSize: 12, opacity: 0.85, lineHeight: 1.45 }}>

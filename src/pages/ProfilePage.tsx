@@ -8,37 +8,45 @@ import {
   CalendarDays,
   PenLine,
   Plus,
+  UserCircle,
 } from "lucide-react";
 import { usePortalData } from "../context/PortalDataContext";
 import { formatJoined } from "../lib/portalDerive";
 
 const leaveTypesProfile = ["Vacation Leave", "Sick Leave", "Birthday Leave", "Personal"];
 
-function VacationDonut({
+function BalanceDonut({
   used,
   total,
   left,
+  title,
+  color,
 }: {
   used: number;
   total: number;
   left: number;
+  title: string;
+  color: string;
 }) {
-  const pct = total > 0 ? used / total : 0;
-  const r = 52;
+  const pct = total > 0 ? Math.min(1, used / total) : 0;
+  const r = 44;
   const c = 2 * Math.PI * r;
   const dash = c * pct;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0 16px" }}>
-      <div style={{ position: "relative", width: 140, height: 140 }}>
-        <svg width="140" height="140" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, minWidth: 160 }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 10 }}>
+        {title}
+      </div>
+      <div style={{ position: "relative", width: 120, height: 120 }}>
+        <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
           <circle cx="60" cy="60" r={r} fill="none" stroke="var(--border)" strokeWidth="12" />
           <circle
             cx="60"
             cy="60"
             r={r}
             fill="none"
-            stroke="var(--navy)"
+            stroke={color}
             strokeWidth="12"
             strokeLinecap="round"
             strokeDasharray={`${dash} ${c}`}
@@ -55,44 +63,42 @@ function VacationDonut({
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 700, color: "var(--navy)", lineHeight: 1.1 }}>
-            {used}
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginTop: 2 }}>
+          <div style={{ fontSize: 20, fontWeight: 700, color, lineHeight: 1.1 }}>{used}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted)", marginTop: 2, letterSpacing: "0.04em" }}>
             OF {total} DAYS
           </div>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 12, width: "100%", marginTop: 8 }}>
+      <div style={{ display: "flex", gap: 8, width: "100%", marginTop: 12 }}>
         <div
           style={{
             flex: 1,
-            padding: "12px 14px",
+            padding: "8px 10px",
             background: "var(--bg)",
             borderRadius: "var(--radius-sm)",
             border: "1px solid var(--border)",
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)" }}>
             USED
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, marginTop: 4 }}>{used}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, marginTop: 2 }}>{used}</div>
         </div>
         <div
           style={{
             flex: 1,
-            padding: "12px 14px",
+            padding: "8px 10px",
             background: "var(--bg)",
             borderRadius: "var(--radius-sm)",
             border: "1px solid var(--border)",
             textAlign: "center",
           }}
         >
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)" }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)" }}>
             LEFT
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, marginTop: 4 }}>{left}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, marginTop: 2 }}>{left}</div>
         </div>
       </div>
     </div>
@@ -107,7 +113,7 @@ function TypeIcon({ variant }: { variant: "vacation" | "medical" | "birthday" })
 }
 
 export function ProfilePage() {
-  const { viewer, absenceHistory, regionalHolidaysProfile, vacationBalance } = usePortalData();
+  const { viewer, absenceHistory, regionalHolidaysProfile, vacationBalance, sickBalance } = usePortalData();
   const u = viewer;
 
   if (!u) {
@@ -121,28 +127,62 @@ export function ProfilePage() {
   return (
     <>
       <div style={{ maxWidth: 1440, margin: "0 auto 24px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 20,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h1 style={{ margin: "0 0 6px", fontSize: 26, fontWeight: 700, color: "var(--navy)" }}>
-              My Profile
-            </h1>
-            <p style={{ margin: 0, fontSize: 14, color: "var(--text-muted)" }}>
-              Manage your professional identity and time-off balances.
-            </p>
+        <section className="hero-gradient" style={{ marginBottom: 28 }}>
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 24,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ maxWidth: 560 }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "5px 12px",
+                  borderRadius: 999,
+                  background: "rgba(255, 255, 255, 0.18)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  marginBottom: 14,
+                }}
+              >
+                <UserCircle size={13} />
+                Profile
+              </div>
+              <h1
+                style={{
+                  margin: "0 0 8px",
+                  fontSize: 32,
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {u.first_name}
+                {u.middle_name ? ` ${u.middle_name}` : ""} {u.last_name}
+              </h1>
+              <p style={{ margin: 0, fontSize: 15, opacity: 0.88, lineHeight: 1.5 }}>
+                Manage your professional identity and time-off balances.
+              </p>
+            </div>
+            <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+              <button type="button" className="btn btn-hero-primary">
+                <Plus size={16} strokeWidth={2.5} />
+                Request Absence
+              </button>
+            </div>
           </div>
-          <button type="button" className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Plus size={18} strokeWidth={2.5} />
-            Request Absence
-          </button>
-        </div>
+        </section>
       </div>
 
       <div style={{ maxWidth: 1440, margin: "0 auto", display: "flex", flexDirection: "column", gap: 24 }}>
@@ -162,7 +202,7 @@ export function ProfilePage() {
                   width: 120,
                   height: 140,
                   borderRadius: 12,
-                  background: "linear-gradient(160deg, #1e3a5f 0%, #3b82f6 45%, #93c5fd 100%)",
+                  background: "linear-gradient(160deg, #990FFA 0%, #E60076 45%, #f3e8ff 100%)",
                   flexShrink: 0,
                   display: "flex",
                   alignItems: "flex-end",
@@ -189,7 +229,7 @@ export function ProfilePage() {
                     transform: "translateX(-50%)",
                     width: 100,
                     height: 44,
-                    background: "linear-gradient(180deg, #1a2b4b 0%, #243a5e 100%)",
+                    background: "linear-gradient(180deg, #990FFA 0%, #7c08c4 100%)",
                     borderRadius: "40px 40px 0 0",
                   }}
                 />
@@ -197,7 +237,8 @@ export function ProfilePage() {
               <div style={{ flex: 1, minWidth: 200 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                   <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>
-                    {u.first_name} {u.last_name}
+                    {u.first_name}
+                {u.middle_name ? ` ${u.middle_name}` : ""} {u.last_name}
                   </h2>
                   <span
                     style={{
@@ -225,11 +266,29 @@ export function ProfilePage() {
                 >
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Region
+                      Citizenship
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <MapPin size={16} color="var(--holiday)" />
-                      {u.region || "—"}
+                      {u.country_citizenship || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+                      Residence
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+                      <MapPin size={16} color="var(--primary)" />
+                      {u.country_residence || u.region || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+                      Contract Jurisdiction
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+                      <BadgeCheck size={16} color="var(--text-muted)" />
+                      {u.country_legal || "—"}
                     </div>
                   </div>
                   <div>
@@ -243,7 +302,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Direct Manager
+                      Lead
                     </div>
                     <div style={{ fontWeight: 500 }}>{u.manager_name || "—"}</div>
                   </div>
@@ -254,17 +313,50 @@ export function ProfilePage() {
                     <div style={{ fontWeight: 500 }}>{formatJoined(u.joined_at)}</div>
                   </div>
                 </div>
+                {u.personal_note ? (
+                  <div
+                    style={{
+                      marginTop: 18,
+                      padding: "12px 14px",
+                      borderRadius: "var(--radius-sm)",
+                      background: "var(--gradient-subtle)",
+                      border: "1px solid var(--border)",
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: "var(--text)",
+                    }}
+                  >
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 6 }}>
+                      PERSONAL NOTE
+                    </div>
+                    {u.personal_note}
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
 
           <div className="card" style={{ padding: "22px 24px" }}>
-            <h2 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700 }}>Vacation Balance</h2>
-            <VacationDonut
-              used={vacationBalance.used}
-              total={vacationBalance.total}
-              left={vacationBalance.left}
-            />
+            <h2 style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 700 }}>Time Off Balance</h2>
+            <p style={{ margin: "0 0 18px", fontSize: 12, color: "var(--text-muted)" }}>
+              Your remaining days for {new Date().getFullYear()}.
+            </p>
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
+              <BalanceDonut
+                title="Vacation"
+                color="var(--primary)"
+                used={vacationBalance.used}
+                total={vacationBalance.total}
+                left={vacationBalance.left}
+              />
+              <BalanceDonut
+                title="Sick Leave"
+                color="var(--sick)"
+                used={sickBalance.used}
+                total={sickBalance.total}
+                left={sickBalance.left}
+              />
+            </div>
           </div>
         </div>
 
@@ -433,7 +525,7 @@ export function ProfilePage() {
         <div
           style={{
             borderRadius: "var(--radius)",
-            background: "linear-gradient(135deg, var(--navy) 0%, #243a5e 100%)",
+            background: "var(--gradient-primary)",
             color: "#fff",
             padding: "24px 28px",
             boxShadow: "var(--shadow-md)",
@@ -452,10 +544,10 @@ export function ProfilePage() {
                 position: "relative",
               }}
             >
-              <CalendarDays size={22} color="#93c5fd" />
+              <CalendarDays size={22} color="var(--primary-bg)" />
               <PenLine
                 size={14}
-                color="#e0e7ff"
+                color="var(--primary-bg)"
                 style={{ position: "absolute", bottom: 8, right: 8 }}
                 strokeWidth={2.5}
               />
@@ -530,7 +622,7 @@ export function ProfilePage() {
               style={{
                 height: 42,
                 background: "#fff",
-                color: "var(--navy)",
+                color: "var(--primary)",
                 fontWeight: 700,
                 border: "none",
               }}

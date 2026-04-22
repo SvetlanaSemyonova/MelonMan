@@ -2,6 +2,7 @@ export type StaffProfile = {
   id: string;
   email: string;
   first_name: string;
+  middle_name: string;
   last_name: string;
   title: string;
   role: "employee" | "lead" | "admin";
@@ -12,7 +13,12 @@ export type StaffProfile = {
   joined_at: string | null;
   vacation_used: number;
   vacation_total: number;
+  sick_total: number;
   birthday: string | null;
+  country_citizenship: string;
+  country_residence: string;
+  country_legal: string;
+  personal_note: string;
   created_at: string;
 };
 

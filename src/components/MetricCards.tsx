@@ -93,17 +93,16 @@ export function MetricCards() {
                 gap: 16,
                 cursor: "pointer",
                 textAlign: "left",
-                border: "1px solid var(--border)",
-                background: "var(--surface)",
-                borderRadius: "var(--radius)",
-                boxShadow: "var(--shadow)",
-                transition: "box-shadow 0.15s, transform 0.15s",
+                transition: "transform 0.15s, box-shadow 0.2s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = "var(--shadow-md)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 18px 36px -16px rgba(153, 15, 250, 0.35), inset 0 1px 0 rgba(255,255,255,0.8)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "var(--shadow)";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "";
               }}
             >
               <div

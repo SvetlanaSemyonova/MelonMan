@@ -6,7 +6,7 @@ import {
   Shield,
   Building2,
 } from "lucide-react";
-import { MelonManMark } from "./MelonManMark";
+import { MelonStaffMark } from "./MelonStaffMark";
 
 export type SidebarRoute = "dashboard" | "calendar" | "profile" | "admin";
 
@@ -43,18 +43,18 @@ export function Sidebar({
     >
       <div style={{ padding: "24px 20px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <MelonManMark size={44} />
+          <MelonStaffMark size={44} />
           <div style={{ minWidth: 0 }}>
             <div
               style={{
                 fontSize: "17px",
                 fontWeight: 800,
-                color: "var(--navy)",
+                color: "var(--primary)",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.15,
               }}
             >
-              MelonMan
+              MelonStaff
             </div>
             <div
               style={{
@@ -100,7 +100,7 @@ export function Sidebar({
                 marginBottom: 4,
                 borderRadius: "var(--radius-sm)",
                 textDecoration: "none",
-                color: isActive ? "var(--navy)" : "var(--text-muted)",
+                color: isActive ? "var(--primary)" : "var(--text-muted)",
                 fontWeight: isActive ? 600 : 500,
                 fontSize: 14,
                 background: isActive ? "var(--holiday-bg)" : "transparent",
@@ -142,7 +142,7 @@ export function Sidebar({
               flexShrink: 0,
             }}
           >
-            <Building2 size={18} color="var(--navy)" />
+            <Building2 size={18} color="var(--primary)" />
           </div>
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{orgName}</div>

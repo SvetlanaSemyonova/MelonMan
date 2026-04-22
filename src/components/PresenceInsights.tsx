@@ -21,11 +21,11 @@ export function PresenceInsights() {
           </p>
           <div style={{ display: "flex", gap: 28 }}>
             <div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: "var(--navy)" }}>{efficiencyPct}%</div>
+              <div style={{ fontSize: 26, fontWeight: 700, color: "var(--primary)" }}>{efficiencyPct}%</div>
               <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>Efficiency</div>
             </div>
             <div>
-              <div style={{ fontSize: 26, fontWeight: 700, color: "var(--navy)" }}>{avgAbsenceDays}</div>
+              <div style={{ fontSize: 26, fontWeight: 700, color: "var(--primary)" }}>{avgAbsenceDays}</div>
               <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>Avg Absence</div>
             </div>
           </div>
@@ -38,7 +38,7 @@ export function PresenceInsights() {
             justifyContent: "space-between",
             gap: 6,
             padding: "12px 8px 0",
-            background: "linear-gradient(180deg, #f8fafc 0%, #fff 100%)",
+            background: "var(--gradient-subtle)",
             borderRadius: "var(--radius-sm)",
             border: "1px solid var(--border)",
           }}
@@ -50,7 +50,7 @@ export function PresenceInsights() {
                 flex: 1,
                 height: `${h}%`,
                 minHeight: 24,
-                background: `linear-gradient(180deg, ${i > 8 ? "#3b82f6" : "#93c5fd"} 0%, #bfdbfe 100%)`,
+                background: `linear-gradient(180deg, ${i > 8 ? "var(--primary)" : "var(--primary-light)"} 0%, var(--primary-bg) 100%)`,
                 borderRadius: 4,
                 opacity: 0.85 + i * 0.01,
               }}
