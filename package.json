@@ -13,6 +13,7 @@
     "db:push:dry": "supabase db push --dry-run"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.76",
     "@react-three/fiber": "^8.18.0",
     "@supabase/supabase-js": "^2.101.1",
     "lucide-react": "^0.468.0",

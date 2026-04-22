@@ -4,11 +4,11 @@ import { MelonStaffMark } from "./MelonStaffMark";
 export type SidebarRoute = "dashboard" | "calendar" | "profile" | "settings" | "admin";
 
 const nav = [
-  { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
-  { id: "calendar" as const, label: "Calendar", icon: Calendar },
-  { id: "profile" as const, label: "Profile", icon: User },
-  { id: "settings" as const, label: "Settings", icon: Settings },
-  { id: "admin" as const, label: "Admin", icon: Shield },
+  { id: "dashboard" as const, label: "Главная", icon: LayoutDashboard },
+  { id: "calendar" as const, label: "Календарь", icon: Calendar },
+  { id: "profile" as const, label: "Профиль", icon: User },
+  { id: "settings" as const, label: "Настройки", icon: Settings },
+  { id: "admin" as const, label: "Админ", icon: Shield },
 ];
 
 export function Sidebar({
@@ -55,7 +55,7 @@ export function Sidebar({
                 marginTop: 3,
               }}
             >
-              Management Suite
+              Портал сотрудников
             </div>
           </div>
         </div>

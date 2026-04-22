@@ -82,7 +82,7 @@ export function RightSidebar() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
           <Gift size={18} color="var(--birthday)" />
-          <span style={{ fontWeight: 700, fontSize: 15 }}>Upcoming Birthdays</span>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>Дни рождения</span>
         </div>
         <div
           style={{
@@ -93,12 +93,12 @@ export function RightSidebar() {
             marginBottom: 10,
           }}
         >
-          THIS WEEK
+          НА ЭТОЙ НЕДЕЛЕ
         </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {upcomingBirthdaysWidget.length === 0 ? (
             <li style={{ padding: "14px 0", fontSize: 13, color: "var(--text-muted)" }}>
-              Укажите дни рождения у сотрудников (админка или таблица).
+              Укажите дни рождения в профилях сотрудников.
             </li>
           ) : null}
           {upcomingBirthdaysWidget.map((b) => (
@@ -151,7 +151,7 @@ export function RightSidebar() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
           <Flag size={18} color="var(--primary)" />
-          <span style={{ fontWeight: 700, fontSize: 15 }}>National Holidays</span>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>Государственные праздники</span>
         </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {nationalWidgetItems.map((h) => (
@@ -199,14 +199,14 @@ export function RightSidebar() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
           <Sparkles size={18} color="var(--primary-bg)" />
-          <span style={{ fontWeight: 700, fontSize: 15 }}>Lead Insights</span>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>Уведомления</span>
         </div>
         <p style={{ margin: "0 0 8px", fontSize: 12, opacity: 0.85, lineHeight: 1.45 }}>
-          Notification preferences for your team.
+          Настройки напоминаний для команды.
         </p>
-        <ToggleRow label="Instant Sick Alerts" />
-        <ToggleRow label="Weekly OOO Digest" />
-        <ToggleRow label="Birthday Reminders" defaultOn />
+        <ToggleRow label="Оповещения о больничных" />
+        <ToggleRow label="Еженедельный дайджест OOO" />
+        <ToggleRow label="Напоминания о днях рождения" defaultOn />
         <button
           type="button"
           className="btn"
@@ -218,7 +218,7 @@ export function RightSidebar() {
             border: "1px solid rgba(255,255,255,0.25)",
           }}
         >
-          Open All Settings
+          Открыть все настройки
         </button>
       </div>
     </div>

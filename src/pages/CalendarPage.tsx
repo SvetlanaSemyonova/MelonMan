@@ -32,7 +32,7 @@ import {
   yearRange,
 } from "../lib/calendarUtils";
 
-const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const WEEKDAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 
 // Country → flag/emoji. Keys match the `country` column values seeded in migration 004.
 const countryFlag: Record<string, string> = {
@@ -138,8 +138,8 @@ function renderEventChip(ev: RenderEvent) {
   if (ev.kind === "national" && ev.nationalStyle === "bar") {
     const flag = flagFor(ev.country);
     const tooltip = ev.country
-      ? `Public Holiday (${ev.country}) — ${ev.label}`
-      : `Public Holiday — ${ev.label}`;
+      ? `Праздник (${ev.country}) — ${ev.label}`
+      : `Праздник — ${ev.label}`;
     return (
       <div
         key={ev.id}
@@ -170,8 +170,8 @@ function renderEventChip(ev: RenderEvent) {
   if (ev.kind === "national") {
     const flag = flagFor(ev.country);
     const tooltip = ev.country
-      ? `Public Holiday (${ev.country}) — ${ev.label}`
-      : `Public Holiday — ${ev.label}`;
+      ? `Праздник (${ev.country}) — ${ev.label}`
+      : `Праздник — ${ev.label}`;
     return (
       <div
         key={ev.id}
@@ -212,7 +212,7 @@ function renderEventChip(ev: RenderEvent) {
     return (
       <div
         key={ev.id}
-        title={ev.label ? `OOO — ${ev.label}` : "OOO — Leave"}
+        title={ev.label ? `OOO — ${ev.label}` : "OOO — Отсутствие"}
         style={{
           height: 22,
           background: oooStyle.bar,
@@ -240,7 +240,7 @@ function renderEventChip(ev: RenderEvent) {
     return (
       <div
         key={ev.id}
-        title={`OOO — ${ev.label}`}
+        title={`OOO — Отпуск — ${ev.label}`}
         style={{
           display: "flex",
           alignItems: "center",
@@ -265,7 +265,7 @@ function renderEventChip(ev: RenderEvent) {
     return (
       <div
         key={ev.id}
-        title={`OOO — Sick — ${ev.label}`}
+        title={`OOO — Больничный — ${ev.label}`}
         style={{
           display: "flex",
           alignItems: "center",
@@ -290,7 +290,7 @@ function renderEventChip(ev: RenderEvent) {
     return (
       <div
         key={ev.id}
-        title={`Birthday — ${ev.label}`}
+        title={`День рождения — ${ev.label}`}
         style={{
           display: "flex",
           alignItems: "center",
@@ -378,7 +378,7 @@ function DayCell({
 function CalendarLegend() {
   return (
     <div className="card" style={{ padding: "18px 18px 14px" }}>
-      <h3 style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700 }}>Legend</h3>
+      <h3 style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 700 }}>Легенда</h3>
       <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
         {legendItems.map((row, idx) => (
           <li
@@ -440,7 +440,7 @@ function TeamPulse({
     >
       <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>{efficiencyPct}%</div>
       <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.9, marginBottom: 14 }}>
-        Capacity this week.
+Загрузка на этой неделе
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 14 }}>
         {faces.map((f, i) => (
@@ -489,10 +489,10 @@ function TeamPulse({
           marginBottom: 12,
         }}
       >
-        In Office
+В офисе
       </span>
       <p style={{ margin: 0, fontSize: 12, lineHeight: 1.45, opacity: 0.85 }}>
-        High workload expected in Week 4 due to the London Conference.
+Пик нагрузки ожидается на 4-й неделе из-за Лондонской конференции.
       </p>
     </div>
   );
@@ -503,7 +503,7 @@ function ComingUp({ line }: { line: string | null }) {
     <div className="card" style={{ padding: "18px 18px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         <PartyPopper size={20} color="var(--birthday)" />
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Coming Up</h3>
+        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Ближайшие события</h3>
       </div>
       <p style={{ margin: 0, fontSize: 13, color: "var(--text)", fontWeight: 500, lineHeight: 1.45 }}>
         {line ? (
@@ -558,10 +558,10 @@ export function CalendarPage() {
   }
 
   function countryTriggerLabel(): string {
-    if (selectedCountries.size === FILTERABLE_COUNTRIES.length) return "All countries";
-    if (selectedCountries.size === 0) return "No countries";
+    if (selectedCountries.size === FILTERABLE_COUNTRIES.length) return "Все страны";
+    if (selectedCountries.size === 0) return "Нет стран";
     if (selectedCountries.size === 1) return Array.from(selectedCountries)[0];
-    return `${selectedCountries.size} countries`;
+    return `${selectedCountries.size} стр.`;
   }
 
   const teamFaces = staff.slice(0, 4).map((s) => `${s.first_name[0] ?? ""}${s.last_name[0] ?? ""}`.toUpperCase());
@@ -590,8 +590,8 @@ export function CalendarPage() {
     view === "year"
       ? `${y} г.`
       : view === "month"
-        ? formatMonthYear(y, m)
-        : formatWeekRange(weekMonday);
+        ? formatMonthYear(y, m, "ru-RU")
+        : formatWeekRange(weekMonday, "ru-RU");
 
   function goPrev() {
     if (view === "year") {
@@ -677,7 +677,7 @@ export function CalendarPage() {
                   letterSpacing: "-0.01em",
                 }}
               >
-                Team Calendar
+Календарь команды
               </h1>
               <p style={{ margin: 0, fontSize: 15, opacity: 0.88, lineHeight: 1.5 }}>
                 {calendarSubtitle}
@@ -716,7 +716,7 @@ export function CalendarPage() {
               </button>
               {view !== "year" ? (
                 <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500 }}>
-                  Month
+                  Месяц
                   <select
                     value={m}
                     style={selectStyle}
@@ -742,7 +742,7 @@ export function CalendarPage() {
                 </span>
               )}
               <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500 }}>
-                Year
+                Год
                 <select
                   value={y}
                   style={selectStyle}
@@ -756,7 +756,7 @@ export function CalendarPage() {
                 </select>
               </label>
               <button type="button" className="btn btn-secondary" onClick={goToday} style={{ fontWeight: 600 }}>
-                Today
+Сегодня
               </button>
             </div>
           </div>
@@ -780,14 +780,13 @@ export function CalendarPage() {
                     padding: "8px 18px",
                     fontSize: 13,
                     fontWeight: 600,
-                    textTransform: "capitalize",
                     background: view === v ? "var(--primary)" : "transparent",
                     color: view === v ? "#fff" : "var(--text-muted)",
                     border: "none",
                     borderRadius: 8,
                   }}
                 >
-                  {v}
+                  {v === "month" ? "Месяц" : v === "week" ? "Неделя" : "Год"}
                 </button>
               ))}
             </div>
@@ -850,7 +849,7 @@ export function CalendarPage() {
                         padding: 0,
                       }}
                     >
-                      Select all
+Выбрать все
                     </button>
                     <button
                       type="button"
@@ -865,7 +864,7 @@ export function CalendarPage() {
                         padding: 0,
                       }}
                     >
-                      Clear
+Очистить
                     </button>
                   </div>
                   <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>

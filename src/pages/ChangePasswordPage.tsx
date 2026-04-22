@@ -85,7 +85,7 @@ export function ChangePasswordPage() {
               MelonStaff
             </div>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", color: "var(--text-muted)", textTransform: "uppercase", marginTop: 2 }}>
-              First login
+Первый вход
             </div>
           </div>
         </div>

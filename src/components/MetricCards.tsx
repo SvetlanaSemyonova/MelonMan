@@ -11,7 +11,7 @@ export function MetricCards() {
     () => [
       {
         key: "onHoliday" as const,
-        label: "On Holiday",
+        label: "В отпуске",
         value: metrics.onHoliday,
         icon: Plane,
         color: "var(--holiday)",
@@ -19,7 +19,7 @@ export function MetricCards() {
       },
       {
         key: "sickLeave" as const,
-        label: "Sick Leave",
+        label: "На больничном",
         value: metrics.sickLeave,
         icon: Stethoscope,
         color: "var(--sick)",
@@ -27,7 +27,7 @@ export function MetricCards() {
       },
       {
         key: "oooRemote" as const,
-        label: "OOO / Remote",
+        label: "Удалённо / OOO",
         value: metrics.oooRemote,
         icon: Home,
         color: "var(--remote)",
@@ -189,7 +189,7 @@ export function MetricCards() {
                   {activeItem.label}
                 </h2>
                 <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--text-muted)" }}>
-                  {activeItem.value} people in this status
+                  {activeItem.value} сотр. в этом статусе
                 </p>
               </div>
               <button

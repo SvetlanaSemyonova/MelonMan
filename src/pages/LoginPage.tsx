@@ -1,7 +1,16 @@
 import { useState, type FormEvent } from "react";
 import { Lock, User, LogIn } from "lucide-react";
+import { Warp } from "@paper-design/shaders-react";
 import { useAuth } from "../context/AuthContext";
 import { MelonStaffMark } from "../components/MelonStaffMark";
+
+// Brand palette in HSL for the Warp shader — matches --primary #990FFA → --secondary #E60076.
+const BRAND_WARP_COLORS = [
+  "hsl(274, 95%, 32%)", // deep violet (dark anchor)
+  "hsl(329, 100%, 48%)", // brand pink
+  "hsl(280, 100%, 60%)", // vivid violet
+  "hsl(320, 100%, 78%)", // soft pink highlight
+];
 
 export function LoginPage() {
   const { signIn } = useAuth();
@@ -26,19 +35,44 @@ export function LoginPage() {
   return (
     <div
       style={{
+        position: "relative",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: 24,
-        background:
-          "radial-gradient(circle at 18% 10%, rgba(153, 15, 250, 0.22), transparent 45%)," +
-          "radial-gradient(circle at 82% 88%, rgba(230, 0, 118, 0.22), transparent 50%)," +
-          "linear-gradient(180deg, #faf5ff 0%, #fdf2f8 100%)",
+        overflow: "hidden",
+        background: "#1a0033",
       }}
     >
       <div
+        aria-hidden
         style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <Warp
+          style={{ height: "100%", width: "100%" }}
+          proportion={0.5}
+          softness={1}
+          distortion={0.28}
+          swirl={0.85}
+          swirlIterations={10}
+          shape="checks"
+          shapeScale={0.1}
+          scale={1}
+          rotation={0}
+          speed={0.8}
+          colors={BRAND_WARP_COLORS}
+        />
+      </div>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
           width: "100%",
           maxWidth: 420,
           borderRadius: "var(--radius-lg)",
@@ -48,7 +82,7 @@ export function LoginPage() {
           WebkitBackdropFilter: "blur(18px) saturate(140%)",
           border: "1px solid rgba(255, 255, 255, 0.6)",
           boxShadow:
-            "0 30px 60px -20px rgba(153, 15, 250, 0.28), 0 8px 24px -12px rgba(230, 0, 118, 0.2), inset 0 1px 0 rgba(255,255,255,0.85)",
+            "0 30px 60px -20px rgba(15, 5, 50, 0.55), 0 8px 24px -12px rgba(230, 0, 118, 0.35), inset 0 1px 0 rgba(255,255,255,0.85)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>

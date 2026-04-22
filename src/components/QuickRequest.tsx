@@ -6,7 +6,7 @@ import { mapQuickRequestTypeToCategory } from "../lib/portalDerive";
 
 const TOAST_MS = 4200;
 
-const absenceTypes = ["Vacation", "Sick Leave", "Remote / OOO", "Personal", "B-Day Leave"];
+const absenceTypes = ["Отпуск", "Больничный", "Удалёнка / OOO", "Личные дела", "Отгул на ДР"];
 
 export function QuickRequest() {
   const { viewer, refetch } = usePortalData();
@@ -72,9 +72,9 @@ export function QuickRequest() {
     <div className="card" style={{ padding: "22px 24px", position: "relative" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
         <div>
-          <h2 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 700 }}>Quick Request</h2>
+          <h2 style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 700 }}>Быстрая заявка</h2>
           <p style={{ margin: 0, fontSize: 13, color: "var(--text-muted)" }}>
-            Submit a new absence request instantly.
+            Отправьте заявку на отсутствие за несколько секунд.
           </p>
         </div>
         <CalendarDays size={22} color="var(--text-muted)" style={{ flexShrink: 0 }} />
@@ -90,7 +90,7 @@ export function QuickRequest() {
           }}
         >
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Absence Type</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Тип отсутствия</span>
             <select
               name="absenceType"
               defaultValue={absenceTypes[0]}
@@ -109,7 +109,7 @@ export function QuickRequest() {
             </select>
           </label>
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Start Date</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Дата начала</span>
             <input
               name="startDate"
               type="date"
@@ -122,7 +122,7 @@ export function QuickRequest() {
             />
           </label>
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>End Date</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-muted)" }}>Дата окончания</span>
             <input
               name="endDate"
               type="date"
@@ -139,7 +139,7 @@ export function QuickRequest() {
             className="btn btn-primary"
             style={{ height: 42, padding: "0 22px", gridColumn: "1 / -1", justifySelf: "start" }}
           >
-            Submit Request
+Отправить заявку
           </button>
         </div>
       </form>

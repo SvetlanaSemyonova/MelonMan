@@ -489,7 +489,7 @@ export function AdminPage() {
               }}
             >
               <Settings size={13} />
-              Admin
+              Админ
             </div>
             <h1
               style={{

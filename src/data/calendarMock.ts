@@ -9,7 +9,7 @@ import {
   startOfWeekMonday,
 } from "../lib/calendarUtils";
 
-export const calendarSubtitle = "Team availability and scheduled absence overview.";
+export const calendarSubtitle = "Обзор присутствия команды и запланированных отсутствий.";
 
 export type EventKind = "national" | "sick" | "holiday" | "birthday" | "event";
 
@@ -116,15 +116,15 @@ export type LegendKind = "ooo" | "publicHoliday" | "birthdayLegend";
 export const legendItems: { key: string; label: string; hint?: string; kind: LegendKind }[] = [
   {
     key: "ooo",
-    label: "OOO — Out of Office",
-    hint: "Sick, vacation, birthday leave & other personal absences",
+    label: "OOO — Вне офиса",
+    hint: "Больничный, отпуск, отгул на ДР и другие личные отсутствия",
     kind: "ooo",
   },
   {
     key: "publicHoliday",
-    label: "Public Holiday",
-    hint: "National & regional holidays — everyone is off",
+    label: "Государственный праздник",
+    hint: "Национальные и региональные праздники — выходной для всех",
     kind: "publicHoliday",
   },
-  { key: "birthday", label: "Birthday", kind: "birthdayLegend" },
+  { key: "birthday", label: "День рождения", kind: "birthdayLegend" },
 ];

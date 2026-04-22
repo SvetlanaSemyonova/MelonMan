@@ -7,12 +7,19 @@ function pillClass(status: TodayAbsence["status"]) {
   return "pill pill-remote";
 }
 
+function statusRu(status: TodayAbsence["status"]): string {
+  if (status === "Holiday") return "Отпуск";
+  if (status === "Sick Leave") return "Больничный";
+  if (status === "Working Remote") return "Удалённо";
+  return status;
+}
+
 export function TodaysAbsences() {
   const { todaysAbsences } = usePortalData();
   return (
     <div className="card" style={{ padding: "22px 24px", marginBottom: 24 }}>
       <h2 style={{ margin: "0 0 18px", fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
-        Today&apos;s Absences
+        Отсутствуют сегодня
       </h2>
       <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
         {todaysAbsences.length === 0 ? (
@@ -36,7 +43,7 @@ export function TodaysAbsences() {
               <div style={{ fontWeight: 600, fontSize: 14 }}>{row.name}</div>
               <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{row.role}</div>
             </div>
-            <span className={pillClass(row.status)}>{row.status}</span>
+            <span className={pillClass(row.status)}>{statusRu(row.status)}</span>
             <div
               style={{
                 fontSize: 13,

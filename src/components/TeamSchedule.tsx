@@ -23,8 +23,8 @@ const typeColors: Record<
   bday: { bg: "rgba(230, 0, 118, 0.14)", border: "var(--birthday)", text: "#be185d" },
 };
 
-const dayHeaderFmt = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric" });
-const WEEK_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+const dayHeaderFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric" });
+const WEEK_SHORT = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"] as const;
 
 function isWeekendColumn(year: number, monthIndex: number, dayOfMonth: number): boolean {
   const d = new Date(year, monthIndex, dayOfMonth);
@@ -49,8 +49,8 @@ export function TeamSchedule() {
 
   const rangeLabel =
     view === "weekly"
-      ? formatWeekRange(weekMonday)
-      : formatMonthYear(monthYear, monthIndex);
+      ? formatWeekRange(weekMonday, "ru-RU")
+      : formatMonthYear(monthYear, monthIndex, "ru-RU");
 
   function goPrev() {
     if (view === "weekly") {
@@ -144,7 +144,7 @@ export function TeamSchedule() {
           gap: 12,
         }}
       >
-        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Team Vacation Schedule</h2>
+        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>График отпусков команды</h2>
         <div
           style={{
             display: "inline-flex",
@@ -171,7 +171,7 @@ export function TeamSchedule() {
                 borderRadius: 6,
               }}
             >
-              {v === "weekly" ? "Weekly" : "Monthly"}
+              {v === "weekly" ? "Неделя" : "Месяц"}
             </button>
           ))}
         </div>
@@ -211,7 +211,7 @@ export function TeamSchedule() {
           </button>
         </div>
         <button type="button" className="btn btn-secondary" onClick={goThisPeriod} style={{ fontSize: 12, fontWeight: 600 }}>
-          {view === "weekly" ? "This week" : "This month"}
+          {view === "weekly" ? "Эта неделя" : "Этот месяц"}
         </button>
       </div>
 
@@ -240,7 +240,7 @@ export function TeamSchedule() {
                 borderBottom: "1px solid var(--border)",
               }}
             >
-              Team member
+              Сотрудник
             </div>
             {view === "weekly"
               ? weekDays.map((d) => (
@@ -290,7 +290,7 @@ export function TeamSchedule() {
 
           {rows.length === 0 ? (
             <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
-              Нет сотрудников в базе — добавьте их в разделе «Администрирование».
+              Нет сотрудников в базе — добавьте их в разделе «Админ».
             </div>
           ) : null}
           {rows.map((row) => (

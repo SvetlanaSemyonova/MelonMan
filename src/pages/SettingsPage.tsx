@@ -273,7 +273,7 @@ export function SettingsPage() {
                 }}
               >
                 <Users size={13} />
-                Settings
+                Настройки
               </div>
               <h1
                 style={{

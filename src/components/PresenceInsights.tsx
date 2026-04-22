@@ -15,18 +15,18 @@ export function PresenceInsights() {
         }}
       >
         <div>
-          <h2 style={{ margin: "0 0 10px", fontSize: 16, fontWeight: 700 }}>Presence Insights</h2>
+          <h2 style={{ margin: "0 0 10px", fontSize: 16, fontWeight: 700 }}>Аналитика присутствия</h2>
           <p style={{ margin: "0 0 20px", fontSize: 13, color: "var(--text-muted)", lineHeight: 1.55 }}>
-            Показатели считаются по данным отсутствий в Supabase за последние месяцы.
+            Показатели рассчитаны по данным отсутствий за последние месяцы.
           </p>
           <div style={{ display: "flex", gap: 28 }}>
             <div>
               <div style={{ fontSize: 26, fontWeight: 700, color: "var(--primary)" }}>{efficiencyPct}%</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>Efficiency</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>Эффективность</div>
             </div>
             <div>
               <div style={{ fontSize: 26, fontWeight: 700, color: "var(--primary)" }}>{avgAbsenceDays}</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>Avg Absence</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>Ср. отсутствие</div>
             </div>
           </div>
         </div>

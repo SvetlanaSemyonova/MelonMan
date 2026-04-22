@@ -14,9 +14,9 @@ import { usePortalData } from "./context/PortalDataContext";
 import { useAuth } from "./context/AuthContext";
 
 function roleLabel(role: string | undefined): string | undefined {
-  if (role === "admin") return "Administrator";
-  if (role === "lead") return "Team Lead";
-  if (role === "employee") return "Employee";
+  if (role === "admin") return "Администратор";
+  if (role === "lead") return "Лид команды";
+  if (role === "employee") return "Сотрудник";
   return role;
 }
 
@@ -37,7 +37,7 @@ export default function App() {
           fontSize: 14,
         }}
       >
-        Загружаем сессию…
+Загружаем сессию…
       </div>
     );
   }
@@ -60,12 +60,14 @@ export default function App() {
 
   const searchPlaceholder =
     route === "profile"
-      ? "Search platform..."
+      ? "Поиск по порталу…"
       : route === "calendar"
-        ? "Search team members or events..."
+        ? "Поиск сотрудников или событий…"
         : route === "admin"
-          ? "Search users, roles..."
-          : "Search team or events...";
+          ? "Поиск пользователей, ролей…"
+          : route === "settings"
+            ? "Поиск сотрудников…"
+            : "Поиск по команде и событиям…";
 
   const viewerName = viewer ? `${viewer.first_name} ${viewer.last_name}` : "—";
   const viewerInitials = viewer
@@ -76,8 +78,8 @@ export default function App() {
     route === "profile"
       ? undefined
       : route === "admin"
-        ? roleLabel(viewer?.role) ?? "Administrator"
-        : roleLabel(viewer?.role) ?? "HR Director";
+        ? roleLabel(viewer?.role) ?? "Администратор"
+        : roleLabel(viewer?.role) ?? "HR-директор";
 
   return (
     <div className="app-shell">
@@ -97,7 +99,7 @@ export default function App() {
             {error}{" "}
             {loading
               ? ""
-              : "Миграция нужна только для таблиц в облаке; для браузера обязателен .env с ключами API."}
+              : "Миграция нужна только для таблиц в облаке; для браузера обязателен .env с ключами API."}{" "}
           </div>
         ) : null}
         <Header

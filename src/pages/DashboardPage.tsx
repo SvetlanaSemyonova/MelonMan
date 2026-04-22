@@ -8,18 +8,29 @@ import { RightSidebar } from "../components/RightSidebar";
 import { usePortalData } from "../context/PortalDataContext";
 
 function greeting(hour: number): string {
-  if (hour < 5) return "Good night";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour < 5) return "Доброй ночи";
+  if (hour < 12) return "Доброе утро";
+  if (hour < 18) return "Добрый день";
+  return "Добрый вечер";
+}
+
+function outText(count: number): string {
+  if (count === 0) return "Сегодня все на месте — команда в полном составе.";
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  let word: string;
+  if (mod10 === 1 && mod100 !== 11) word = "сотрудник отсутствует";
+  else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) word = "сотрудника отсутствуют";
+  else word = "сотрудников отсутствуют";
+  return `Сегодня ${count} ${word}. Краткий обзор команды ниже.`;
 }
 
 export function DashboardPage() {
   const { viewer, metrics } = usePortalData();
-  const firstName = viewer?.first_name ?? "there";
+  const firstName = viewer?.first_name ?? "коллега";
   const hello = greeting(new Date().getHours());
   const totalOut = metrics.onHoliday + metrics.sickLeave + metrics.oooRemote;
-  const dateLabel = new Date().toLocaleDateString("en-GB", {
+  const dateLabel = new Date().toLocaleDateString("ru-RU", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -72,19 +83,17 @@ export function DashboardPage() {
                 {hello}, {firstName} 👋
               </h1>
               <p style={{ margin: 0, fontSize: 15, opacity: 0.88, lineHeight: 1.5 }}>
-                {totalOut === 0
-                  ? "Everyone's in today — a full team, full momentum."
-                  : `${totalOut} ${totalOut === 1 ? "person is" : "people are"} out today. Here's your team at a glance.`}
+                {outText(totalOut)}
               </p>
             </div>
             <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
               <button type="button" className="btn btn-hero-secondary">
                 <Download size={16} />
-                Download Report
+                Скачать отчёт
               </button>
               <button type="button" className="btn btn-hero-primary">
                 <Plus size={16} />
-                Log Absence
+                Добавить заявку
               </button>
             </div>
           </div>

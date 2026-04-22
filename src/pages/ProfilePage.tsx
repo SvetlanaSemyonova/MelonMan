@@ -14,7 +14,7 @@ import {
 import { usePortalData } from "../context/PortalDataContext";
 import { formatJoined } from "../lib/portalDerive";
 
-const leaveTypesProfile = ["Vacation Leave", "Sick Leave", "Birthday Leave", "Personal"];
+const leaveTypesProfile = ["Отпуск", "Больничный", "Отгул на ДР", "Личные дела"];
 
 function BalanceDonut({
   used,
@@ -66,7 +66,7 @@ function BalanceDonut({
         >
           <div style={{ fontSize: 20, fontWeight: 700, color, lineHeight: 1.1 }}>{used}</div>
           <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted)", marginTop: 2, letterSpacing: "0.04em" }}>
-            OF {total} DAYS
+            ИЗ {total} ДН.
           </div>
         </div>
       </div>
@@ -82,7 +82,7 @@ function BalanceDonut({
           }}
         >
           <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)" }}>
-            USED
+            ИСПОЛЬЗОВАНО
           </div>
           <div style={{ fontSize: 15, fontWeight: 700, marginTop: 2 }}>{used}</div>
         </div>
@@ -97,7 +97,7 @@ function BalanceDonut({
           }}
         >
           <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)" }}>
-            LEFT
+            ОСТАЛОСЬ
           </div>
           <div style={{ fontSize: 15, fontWeight: 700, marginTop: 2 }}>{left}</div>
         </div>
@@ -158,7 +158,7 @@ export function ProfilePage() {
                 }}
               >
                 <UserCircle size={13} />
-                Profile
+                Профиль
               </div>
               <h1
                 style={{
@@ -173,13 +173,13 @@ export function ProfilePage() {
                 {u.middle_name ? ` ${u.middle_name}` : ""} {u.last_name}
               </h1>
               <p style={{ margin: 0, fontSize: 15, opacity: 0.88, lineHeight: 1.5 }}>
-                Manage your professional identity and time-off balances.
+Управляйте профилем и балансами отсутствий.
               </p>
             </div>
             <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
               <button type="button" className="btn btn-hero-primary">
                 <Plus size={16} strokeWidth={2.5} />
-                Request Absence
+Подать заявку
               </button>
             </div>
           </div>
@@ -252,7 +252,7 @@ export function ProfilePage() {
                       color: "var(--holiday)",
                     }}
                   >
-                    ACTIVE
+АКТИВЕН
                   </span>
                 </div>
                 <p style={{ margin: "6px 0 18px", fontSize: 14, color: "var(--text-muted)" }}>
@@ -275,7 +275,7 @@ export function ProfilePage() {
                 >
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Citizenship
+Гражданство
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <MapPin size={16} color="var(--holiday)" />
@@ -284,7 +284,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Residence
+Проживание
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <MapPin size={16} color="var(--primary)" />
@@ -293,7 +293,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Contract Jurisdiction
+Юрисдикция ИП
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <BadgeCheck size={16} color="var(--text-muted)" />
@@ -302,7 +302,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Department
+Отдел
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <Briefcase size={16} color="var(--primary)" />
@@ -311,7 +311,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Employee ID
+ID сотрудника
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
                       <BadgeCheck size={16} color="var(--text-muted)" />
@@ -320,13 +320,13 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Lead
+Лид
                     </div>
                     <div style={{ fontWeight: 500 }}>{u.manager_name || "—"}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
-                      Joined Date
+Дата приёма
                     </div>
                     <div style={{ fontWeight: 500 }}>{formatJoined(u.joined_at)}</div>
                   </div>
@@ -345,7 +345,7 @@ export function ProfilePage() {
                     }}
                   >
                     <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-muted)", marginBottom: 6 }}>
-                      PERSONAL NOTE
+ЛИЧНАЯ ЗАМЕТКА
                     </div>
                     {u.personal_note}
                   </div>
@@ -355,20 +355,20 @@ export function ProfilePage() {
           </div>
 
           <div className="card" style={{ padding: "22px 24px" }}>
-            <h2 style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 700 }}>Time Off Balance</h2>
+            <h2 style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 700 }}>Баланс отсутствий</h2>
             <p style={{ margin: "0 0 18px", fontSize: 12, color: "var(--text-muted)" }}>
-              Your remaining days for {new Date().getFullYear()}.
+              Доступные дни на {new Date().getFullYear()}.
             </p>
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" }}>
               <BalanceDonut
-                title="Vacation"
+                title="Отпуск"
                 color="var(--primary)"
                 used={vacationBalance.used}
                 total={vacationBalance.total}
                 left={vacationBalance.left}
               />
               <BalanceDonut
-                title="Sick Leave"
+                title="Больничные"
                 color="var(--sick)"
                 used={sickBalance.used}
                 total={sickBalance.total}
@@ -398,7 +398,7 @@ export function ProfilePage() {
                 gap: 12,
               }}
             >
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Absence History</h2>
+              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>История отсутствий</h2>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -411,16 +411,16 @@ export function ProfilePage() {
                   gap: 6,
                 }}
               >
-                All Leaves
+Все отсутствия
                 <ChevronDown size={14} />
               </button>
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "var(--bg)", color: "var(--text-muted)", fontSize: 11, fontWeight: 700 }}>
-                  <th style={{ textAlign: "left", padding: "12px 22px", letterSpacing: "0.05em" }}>TYPE</th>
-                  <th style={{ textAlign: "left", padding: "12px 16px", letterSpacing: "0.05em" }}>DURATION</th>
-                  <th style={{ textAlign: "right", padding: "12px 22px", letterSpacing: "0.05em" }}>STATUS</th>
+                  <th style={{ textAlign: "left", padding: "12px 22px", letterSpacing: "0.05em" }}>ТИП</th>
+                  <th style={{ textAlign: "left", padding: "12px 16px", letterSpacing: "0.05em" }}>ПЕРИОД</th>
+                  <th style={{ textAlign: "right", padding: "12px 22px", letterSpacing: "0.05em" }}>СТАТУС</th>
                 </tr>
               </thead>
               <tbody>
@@ -465,7 +465,7 @@ export function ProfilePage() {
                   cursor: "pointer",
                 }}
               >
-                View Full History
+Посмотреть всю историю
               </button>
             </div>
           </div>
@@ -482,7 +482,7 @@ export function ProfilePage() {
                 flexWrap: "wrap",
               }}
             >
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Regional Holidays</h2>
+              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Региональные праздники</h2>
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -571,9 +571,9 @@ export function ProfilePage() {
               />
             </div>
             <div>
-              <h2 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>Plan Your Next Break</h2>
+              <h2 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 700 }}>Запланируйте следующий отпуск</h2>
               <p style={{ margin: 0, fontSize: 13, opacity: 0.9 }}>
-                Quickly submit a new leave request for approval.
+Отправьте новую заявку на отсутствие на согласование.
               </p>
             </div>
           </div>
@@ -586,7 +586,7 @@ export function ProfilePage() {
             }}
           >
             <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>Leave Type</span>
+              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>Тип отсутствия</span>
               <select
                 defaultValue={leaveTypesProfile[0]}
                 style={{
@@ -605,7 +605,7 @@ export function ProfilePage() {
               </select>
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>Start Date</span>
+              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>Дата начала</span>
               <input
                 type="text"
                 placeholder="mm/dd/yyyy"
@@ -620,7 +620,7 @@ export function ProfilePage() {
               />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>End Date</span>
+              <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>Дата окончания</span>
               <input
                 type="text"
                 placeholder="mm/dd/yyyy"
@@ -645,7 +645,7 @@ export function ProfilePage() {
                 border: "none",
               }}
             >
-              Submit Request
+Отправить заявку
             </button>
           </div>
         </div>

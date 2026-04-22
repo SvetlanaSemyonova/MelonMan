@@ -148,7 +148,7 @@ export function InviteAcceptPage({ token }: { token: string }) {
               MelonStaff
             </div>
             <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.04em", color: "var(--text-muted)", textTransform: "uppercase", marginTop: 2 }}>
-              Invitation
+Приглашение
             </div>
           </div>
         </div>
